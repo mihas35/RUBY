@@ -297,6 +297,7 @@ color(moment().format('DD/MM/YY HH:mm:ss'), '#A1FFCE'),
 color(`\n☁️ Conectado correctamente al WhatsApp.\n`, '#7fff00')
 )
 console.log(receivedPendingNotifications)
+await joinChannels(client)
 }
 })
 
@@ -317,3 +318,8 @@ console.log(chalk.redBright(`Update ${__filename}`))
 delete require.cache[file]
 require(file)
 })
+
+async function joinChannels(client) {
+for (const channelId of Object.values(global.ch)) {
+await conn.newsletterFollow(channelId).catch(() => {})
+}}
