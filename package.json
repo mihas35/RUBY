@@ -1,5 +1,5 @@
 {
-"name": "CuriosityBot",
+"name": "CuriosityBot-MD",
 "version": "2.0.0",
 "description": "Whatsapp bot",
 "main": "index.js",
@@ -7,10 +7,10 @@
 "scripts": {
 "start": "node index.js"
 },
-"author": "Zam",
+"author": "GataNina-Li",
 "license": "ISC",
 "dependencies": {
-"@whiskeysockets/baileys": "^6.7.7",
+"@whiskeysockets/baileys": "github:ds6/bails",
 "@adiwajshing/keyed-db": "^0.2.4",
 "@bochilteam/scraper": "^4.2.4",
 "@ffmpeg-installer/ffmpeg": "^1.1.0",
