@@ -582,13 +582,13 @@ case 'tiktok': {
 if (!text) return m.reply('Ingrese un *enlace* de vídeo de *TikTok* o una *consulta* para buscar videos\n\n`Ejemplo`: .tiktok https://vm.tiktok.com/ZMrWSMM8r')
 
 const Tiktok = require('./lib/tiktok')
+const tiktok = new Tiktok()
 if (args[0] === 'search') {
     const results = await Tiktok.search(args.slice(1).join(' '))
     if (results.length === 0) return m.reply('No se encontraron resultados para la consulta proporcionada')
     const text = results.map((result, index) => `${index + 1}. ${result.title}\n${result.url}`).join('\n')
     return m.reply(`Resultados de búsqueda:\n${text}`)
 } else {
-    const tiktok = new Tiktok()
     const data = await tiktok.download(text)
     
     const txt = `*· Título:* ${data.title || 'Sin título'}
