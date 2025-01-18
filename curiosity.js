@@ -583,37 +583,37 @@ if (!text) return m.reply('Ingrese un *enlace* de vídeo de *TikTok* o una *cons
 
 const Tiktok = require('./lib/tiktok')
 if (command === 'search') {
-    const results = await Tiktok.search(text)
-    if (results.length === 0) {
-        return m.reply('No se encontraron resultados para la consulta proporcionada')
+    const results = await Tiktok.search(args[1])
+    if (results.length === 0) return m.reply('No se encontraron resultados para la consulta proporcionada')
+    const text = results.map((result, index) => `${index + 1}. ${result.title}\n${result.url}`).join('\n')
+    return m.reply(`Resultados de búsqueda:\n${text}`)
+} else {
+    const tiktok = new Tiktok()
+    const data = await tiktok.download(text)
+    
+    const txt = `*· Título:* ${data.title || 'Sin título'}
+    *· Subido:* ${data.create_time}
+    
+    E S T A D O
+    *· Me gusta* – ${data.like_count}
+    *· Comentarios* – ${data.comment_count}
+    *· Compartidas* – ${data.share_count}
+    *· Vistas* – ${data.views_count}
+    *· Favoritos* – ${data.favorite_count}
+    
+    ${global.wm}`
+    if (data.media.type === 'image') {
+    
+    for (const image of data.media.images) {
+    await client.sendMessage(m.chat, { image: { url: image }, caption: data.title })
     }
-    const searchText = results.map((result, index) => `${index + 1}. ${result.title}\n${result.url}`).join('\n')
-    return m.reply(`Resultados de búsqueda:\n${searchText}`)
+    } else if (data.media.type === 'video') {
+    await client.sendMessage(m.chat, { video: { url: data.media.nowatermark.play }, caption: txt }, { quoted: m })
+    await client.sendMessage(m.chat, { audio: { url: data.music.play }, mimetype: 'audio/mp4' }, { quoted: m })
+    }
+
 }
 
-const tiktok = new Tiktok()
-const data = await tiktok.download(text)
-
-const txt = `*· Título:* ${data.title || 'Sin título'}
-*· Subido:* ${data.create_time}
-
-E S T A D O
-*· Me gusta* – ${data.like_count}
-*· Comentarios* – ${data.comment_count}
-*· Compartidas* – ${data.share_count}
-*· Vistas* – ${data.views_count}
-*· Favoritos* – ${data.favorite_count}
-
-${global.wm}`
-if (data.media.type === 'image') {
-
-for (const image of data.media.images) {
-await client.sendMessage(m.chat, { image: { url: image }, caption: data.title })
-}
-} else if (data.media.type === 'video') {
-await client.sendMessage(m.chat, { video: { url: data.media.nowatermark.play }, caption: txt }, { quoted: m })
-await client.sendMessage(m.chat, { audio: { url: data.music.play }, mimetype: 'audio/mp4' }, { quoted: m })
-}
 
 }
 break
