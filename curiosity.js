@@ -613,7 +613,6 @@ E S T A D O
 } else {
     const region = 'US'
     const trending = await tiktok.tend(region)
-    console.log(trending)
     
     const video = trending[Math.floor(Math.random() * trending.length)]
     const txt = `*· Título:* ${video.title || 'Sin título'}
@@ -627,7 +626,7 @@ E S T A D O
 *· Favoritos* – ${video.favorite_count}
     
 ${global.wm}`
-    await client.sendMessage(m.chat, { video: { url: video.media.nowatermark.play }, caption: txt }, { quoted: m })
+    await client.sendMessage(m.chat, { video: { url: video.media.nowatermark }, caption: txt }, { quoted: m })
     
 }
 
