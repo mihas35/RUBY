@@ -586,7 +586,7 @@ const tiktok = new Tiktok()
 if (args[0] === 'search') {
     const results = await tiktok.search(args.slice(1).join(' '))
     if (results.length === 0) return m.reply('No se encontraron resultados para la consulta proporcionada')
-    const text = results.map((result, index) => `${index + 1}. *· Título:* ${result.title}\n*· Subido:* ${result.creation}\n*· Vistas:* ${result.views_count}`).join('\n')
+    const text = results.map((result, index) => `┌  ◦*Título:* ${result.title}\n│  ◦ *Subido:* ${result.creation}\n└  ◦ *Vistas:* ${result.views_count}`).join('\n')
     return m.reply(`Resultados de búsqueda: ${args.slice(1).join(' ')}\n${text}`)
 } else {
     const data = await tiktok.download(text)
