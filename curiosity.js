@@ -581,6 +581,7 @@ break
 case 'tiktok': {
 if (!text) return m.reply('Ingrese un *enlace* de vídeo de *TikTok*\n\n`Ejemplo`: .tiktok https://vm.tiktok.com/ZMrWSMM8r')
 
+const Tiktok = require('./lib/tiktok')
 const tiktok = new Tiktok()
 const data = await tiktok.download(text)
 
