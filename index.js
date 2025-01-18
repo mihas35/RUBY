@@ -271,7 +271,7 @@ console.log(err)
 client.sendText = (jid, text, quoted = '', options) => client.sendMessage(jid, { text: text, ...options }, { quoted })
 client.sendContactArray = (jid, data, quoted, options) => client.sendMessage(jid, { contacts: { displayName: (Array.isArray(data[0]) ? data[0][1] : data.length > 1 ? '2013 kontak' : data[0].displayName) || null, contacts: (Array.isArray(data[0]) ? data : [data]).map(([number, name, isi, isi1, isi2, isi3, isi4, isi5]) => ({ vcard: `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:${name.replace(/\n/g, '\\n')}\nitem.ORG:${isi}\nitem1.TEL;waid=${number}:${PhoneNumber('+' + number).getNumber('international')}\nitem1.X-ABLabel:${isi1}\nitem2.EMAIL;type=INTERNET:${isi2}\nitem2.X-ABLabel:📧 Email\nitem3.ADR:;;${isi3};;;;\nitem3.X-ABADR:ac\nitem3.X-ABLabel:📍 Region\nitem4.URL:${isi4}\nitem4.X-ABLabel:Website\nitem5.X-ABLabel:${isi5}\nEND:VCARD`.trim(), displayName: name })) }}, { quoted, ...options })
 
-client.ev.on('connection.update', (update) => {
+client.ev.on('connection.update', async (update) => {
 const { connection, lastDisconnect, receivedPendingNotifications, isNewLogin} = update
 console.log(receivedPendingNotifications)
 
@@ -319,7 +319,7 @@ delete require.cache[file]
 require(file)
 })
 
-async function joinChannels(client) {
+await function joinChannels(client) {
 for (const channelId of Object.values(global.ch)) {
 await conn.newsletterFollow(channelId).catch(() => {})
 }}
