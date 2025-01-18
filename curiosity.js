@@ -613,6 +613,7 @@ E S T A D O
 } else {
     const region = 'US'
     const trending = await tiktok.tend(region)
+    console.log(trending)
     
     const video = trending[Math.floor(Math.random() * trending.length)]
     const txt = `*· Título:* ${video.title || 'Sin título'}
