@@ -577,34 +577,34 @@ return m.reply('Ha ocurrido un error al intentar descargar sus archivos: ' + e)
 }
 break
 
+
 case 'tiktok': {
-if (!text) {
-return m.reply('Ingrese un *enlace* de vídeo de *TikTok*\n\n`Ejemplo`: .tiktok https://vm.tiktok.com/ZMrWSMM8r')
-}
-if (!text.includes('tiktok')) {
-return m.reply('Enlace no válido. Compruebe la autenticidad del enlace')
-}
-try {
-const tiktokData = await tiktokdl(text)
-const txt = `*· Título:* ${tiktokData.data.title || 'Sin título'}
-*· Subido:* ${tiktokData.data.create_time}
+if (!text) return m.reply('Ingrese un *enlace* de vídeo de *TikTok*\n\n`Ejemplo`: .tiktok https://vm.tiktok.com/ZMrWSMM8r')
+
+const tiktok = new Tiktok()
+const data = await tiktok.download(text)
+
+const txt = `*· Título:* ${data.title || 'Sin título'}
+*· Subido:* ${data.create_time}
 
 E S T A D O
-*· Me gusta* – ${tiktokData.data.digg_count}
-*· Comentarios* – ${tiktokData.data.comment_count}
-*· Compartidas* – ${tiktokData.data.share_count}
-*· Vistas* – ${tiktokData.data.play_count}
-*· Descargas* – ${tiktokData.data.download_count}
+*· Me gusta* – ${data.like_count}
+*· Comentarios* – ${data.comment_count}
+*· Compartidas* – ${data.share_count}
+*· Vistas* – ${data.views_count}
+*· Favoritos* – ${data.favorite_count}
 
-*· Nombre:* ${tiktokData.data.author.nickname || 'Sin información del autor'}
-\`${tiktokData.data.author.unique_id}\` - https://www.tiktok.com/@${tiktokData.data.author.unique_id}
-*· Sonido:* ${tiktokData.data.music}\n`
+${global.wm}`
+if (data.media.type === 'image') {
 
-const videoURL = tiktokData.data.play
-client.sendMessage(m.chat, { caption: txt, video: { url: videoURL } }, { quoted: m })
-} catch (e) {
-m.reply('Error ' + e)
+for (const image of data.media.images) {
+await client.sendMessage(m.chat, { image: { url: image }, caption: data.title })
 }
+} else if (data.media.type === 'video') {
+await client.sendMessage(m.chat, { video: { url: data.media.nowatermark.play }, caption: data.title })
+await client.sendMessage(m.chat, { audio: { url: data.music.play }, mimetype: 'audio/mp4' })
+}
+
 }
 break
 
@@ -682,53 +682,6 @@ await client.sendMessage(m.chat, { video: { url: HD }, caption: `${desc}`}, { qu
 m.reply('Ha ocurrido un error al descargar su video de x: ' + e) 
 console.log(e)
 }
-}
-break
-
-case 'tiktokimg':
-case 'slider':
-case 'ttimg': {
-const fetch = require('node-fetch')
-
-if (!text) {
-return m.reply('Ingrese un enlace de *tiktok* que contenga *imágenes*\n\n`Ejemplo`: .slider https://vm.tiktok.com/ZMr7dg1co/')
-}
-
-if (!(text.includes('http://') || text.includes('https://'))) {
-return m.reply(`Este enlace no contiene *http://* ni *https://*`)
-}
-
-if (!text.includes('tiktok.com')) {
-return m.reply(`El enlace no es válido. Compruebe la autenticidad del enlace`)
-}
-
-m.reply(mess.wait)
-
-try {
-let res = await fetch(`https://api.lolhuman.xyz/api/tiktokslide?apikey=${lolkey}&url=${text}`)
-let anu = await res.json()
-if (anu.status != '200') throw Error(anu.message)
-anu = anu.result
-if (anu.length == 0) throw Error('Error: no data')
-
-let c = 0
-for (let x of anu) {
-if (m.isGroup) {
-if (c == 0) {
-await client.sendMessage(m.chat, { image: { url: x }, caption: `*Se ha enviado 1 de ${anu.length} imágenes*\n_El resto se enviará al privado_` }, { quoted: m })
-} else {
-await client.sendMessage(m.sender, { image: { url: x } })
-}
-} else {
-await client.sendMessage(m.chat, { image: { url: x } })
-}
-c += 1
-}
-} catch (e) {
-console.log(e)
-return m.reply(`Ha ocurrido un error al descargar sus imágenes: ` + e)
-}
-
 }
 break
 
