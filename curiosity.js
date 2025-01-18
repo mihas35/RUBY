@@ -1,4 +1,4 @@
- //Código elaborado por (https://github.com/AzamiJs)
+//Código elaborado por (https://github.com/AzamiJs)
 
 const fs = require('fs')
 const axios = require('axios')
@@ -579,9 +579,18 @@ break
 
 
 case 'tiktok': {
-if (!text) return m.reply('Ingrese un *enlace* de vídeo de *TikTok*\n\n`Ejemplo`: .tiktok https://vm.tiktok.com/ZMrWSMM8r')
+if (!text) return m.reply('Ingrese un *enlace* de vídeo de *TikTok* o una *consulta* para buscar videos\n\n`Ejemplo`: .tiktok https://vm.tiktok.com/ZMrWSMM8r')
 
 const Tiktok = require('./lib/tiktok')
+if (command === 'search') {
+    const results = await Tiktok.search(text)
+    if (results.length === 0) {
+        return m.reply('No se encontraron resultados para la consulta proporcionada')
+    }
+    const searchText = results.map((result, index) => `${index + 1}. ${result.title}\n${result.url}`).join('\n')
+    return m.reply(`Resultados de búsqueda:\n${searchText}`)
+}
+
 const tiktok = new Tiktok()
 const data = await tiktok.download(text)
 
@@ -1201,12 +1210,6 @@ res.on('end', function () {resolve(Buffer.concat(chunks))})
 res.on('error', function (err) {
 reject(err)
 })},)})}
-
-async function tiktokdl(url) {
-let tikwm = `https://www.tikwm.com/api/?url=${url}?hd=1`
-let response = await (await fetch(tikwm)).json()
-return response
-}
 		
 default:
      
