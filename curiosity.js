@@ -602,8 +602,8 @@ for (const image of data.media.images) {
 await client.sendMessage(m.chat, { image: { url: image }, caption: data.title })
 }
 } else if (data.media.type === 'video') {
-await client.sendMessage(m.chat, { video: { url: data.media.nowatermark.play }, caption: data.title })
-await client.sendMessage(m.chat, { audio: { url: data.music.play }, mimetype: 'audio/mp4' })
+await client.sendMessage(m.chat, { video: { url: data.media.nowatermark.play }, caption: txt }, { quoted: m })
+await client.sendMessage(m.chat, { audio: { url: data.music.play }, mimetype: 'audio/mp4' }, { quoted: m })
 }
 
 }
