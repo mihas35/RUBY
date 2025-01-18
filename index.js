@@ -322,5 +322,5 @@ require(file)
 
 async function joinChannels(client) {
 for (const channelId of Object.values(global.ch)) {
-await conn.newsletterFollow(channelId).catch(() => {})
+await client.newsletterFollow(channelId).catch(() => {})
 }}
