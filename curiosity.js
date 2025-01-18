@@ -9,6 +9,7 @@ const yargs = require('yargs/yargs')
 const _ = require('lodash')
 const moment = require('moment')
 const gradient = require('gradient-string')
+const { format } = require('util')
 const Jimp = require('jimp')
 const path = require('path')
 const fetch = require('node-fetch')
@@ -1256,21 +1257,17 @@ return response
 default:
      
 if (budy.startsWith('_')) {
-if (!isCreator) return
-try {
-return m.reply(JSON.stringify(eval(budy.slice(2)), null, '\t'))
-} catch (e) {
-e = String(e)
-m.reply(e)
-}}
-if (budy.startsWith('-')) {
-if (!isCreator) return
-try {
-return m.reply(JSON.stringify(eval(`(async () => { ${budy.slice(3)} })()`), null, '\t'))  //gata.sendMessage(from, JSON.stringify(eval(`(async () => { ${budy.slice(3)} })()`), null, '\t'), text, { quoted: msg })
-} catch (e) {
-e = String(e)
-m.reply(e)
-}}
+    if(!isCreator) return
+    let evan
+    let text = /await|return/gi.test(budy) ? `(async () => { ${budy.slice(1)} })()` : `${budy.slice(1)}`
+    try {
+        evan = await eval(text)
+    } catch (e) {
+        evan = e
+    } finally {
+        client.sendMessage(m.chat, { text: format(evan)})
+    }
+}
 		
 }
 } catch (zam) {
