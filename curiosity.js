@@ -579,27 +579,25 @@ break
 
 
 case 'tiktok': {
-if (!text) return m.reply('Ingrese un *enlace* de vídeo de *TikTok* o una *consulta* para buscar videos\n\n`Ejemplo`: .tiktok https://vm.tiktok.com/ZMrWSMM8r')
-
 const Tiktok = require('./lib/tiktok')
 const tiktok = new Tiktok()
 if (args[0] === 'search') {
     const results = await tiktok.search(args.slice(1).join(' '))
     if (results.length === 0) return m.reply('No se encontraron resultados para la consulta proporcionada')
-    const text = results.map((result, index) => `┌  ◦  Resultado ${index + 1}\n│  ◦ *Título:* ${result.title}\n│  ◦ *Subido:* ${result.creation}\n└  ◦ *Vistas:* ${result.views_count}`).join('\n')
+    const text = results.map((result, index) => `\n┌  ◦  Resultado ${index + 1}\n│  ◦ *Título:* ${result.title}\n│  ◦ *Subido:* ${result.creation}\n└  ◦ *Vistas:* ${result.views_count}`).join('\n')
     return m.reply(`Resultados de búsqueda: ${args.slice(1).join(' ')}\n${text}`)
-} else {
+} else if (text) {
     const data = await tiktok.download(text)
     
     const txt = `*· Título:* ${data.title || 'Sin título'}
-    *· Subido:* ${data.creation}
+*· Subido:* ${data.creation}
     
-    E S T A D O
-    *· Me gusta* – ${data.like_count}
-    *· Comentarios* – ${data.comment_count}
-    *· Compartidas* – ${data.share_count}
-    *· Vistas* – ${data.views_count}
-    *· Favoritos* – ${data.favorite_count}
+E S T A D O
+*· Me gusta* – ${data.like_count}
+*· Comentarios* – ${data.comment_count}
+*· Compartidas* – ${data.share_count}
+*· Vistas* – ${data.views_count}
+*· Favoritos* – ${data.favorite_count}
     
     ${global.wm}`
     if (data.media.type === 'image') {
@@ -612,6 +610,24 @@ if (args[0] === 'search') {
     await client.sendMessage(m.chat, { audio: { url: data.music.play }, mimetype: 'audio/mp4' }, { quoted: m })
     }
 
+} else {
+    const region = 'US'
+    const trending = await tiktok.tend(region)
+    
+    const video = trending[Math.floor(Math.random() * trending.length)]
+    const txt = `*· Título:* ${video.title || 'Sin título'}
+*· Subido:* ${video.creation}
+    
+E S T A D O
+*· Me gusta* – ${video.like_count}
+*· Comentarios* – ${video.comment_count}
+*· Compartidas* – ${video.share_count}
+*· Vistas* – ${video.views_count}
+*· Favoritos* – ${video.favorite_count}
+    
+${global.wm}`
+    await client.sendMessage(m.chat, { video: { url: video.media.nowatermark.play }, caption: txt }, { quoted: m })
+    
 }
 
 
