@@ -81,32 +81,19 @@ if(!isNumber(user.premium)) user.premium = false
 if (typeof chats !== 'object') global.db.data.chats[m.chat] = {}
 if (chats) {
 if (!('welcome' in chats)) chats.welcome = true
-if (!('antilink' in chats)) chats.antilink = true
+if (!('antilink' in chats)) chats.antilink = false
 if (!('antifake' in chats)) chats.antifake = false  
 if (!('detect' in chats)) chats.detect = true 	
 if (!('mute' in chats)) chats.mute = false
 } else global.db.data.chats[m.chat] = {
 welcome: true,
-antilink: true,
+antilink: false,
 antifake: false,
 detect: true, 	
 mute: false
 }
 
-global.mess = {
-admin: 'Debes ser administrador para ejecutar esta función',
-botAdmin: 'El bot debe ser administrador para ejecutar la función',
-owner: 'Solo mi propietario puede hacer uso de este comando',
-group: 'Esta función sólo funciona en chats grupales', 
-private: 'Esta función sólo funciona en chats privados',
-wait: '`Cargando...`'
-}
-
-const link = 'https://whatsapp.com/channel/0029VaB4w2ZFHWpwgyEe3w2k'
-const fotos = 'https://qu.ax/lFTW.jpeg'
-const Title = wm
-const Body = 'Zam'
-
+//console
 if (m.message) {
 const fecha = chalk.bold.magentaBright(`\nFecha: ${chalk.whiteBright(moment().format('DD/MM/YY HH:mm:ss'))}`)
 const mensaje = chalk.bold.greenBright(`\nMensaje: ${chalk.whiteBright(msgs(m.text))}`)
@@ -116,6 +103,7 @@ const grupo = m.isGroup ? chalk.bold.cyanBright(`\nGrupo: ${chalk.greenBright(gr
 console.log(`${fecha}${mensaje}${usuario}${remitente}${grupo}`)
 }
 
+//interactive button
 if (m.mtype === 'interactiveResponseMessage') {   
 let msg = m.message[m.mtype]  || m.msg
 if (msg.nativeFlowResponseMessage && !m.isBot ) { 
@@ -130,6 +118,7 @@ messageTimestamp  : m.messageTimestamp || 754785898978
 return client.ev.emit('messages.upsert', { messages : [ emit ] ,  type : 'notify'})
 }}}
 
+//antilink all
 if (global.db.data.chats[m.chat].antilink && groupMetadata) {
 let linksProhibidos = {
 'telegram': /telegram\.me|t\.me/gi,
@@ -159,6 +148,7 @@ client.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
 }
 }
 
+//antifake
 if (global.db.data.chats[m.chat].antifake && !isAdmins) {
 let forbidPrefixes = ['965', '966', '971', '974', '212', '213', '216', '44', '1', '62', '61', '64', '353', '33', '32', '41', '352', '377', '351', '244', '258', '91', '977', '880', '92', '94', '960', '7', '380', '375', '998', '996', '373', '374', '994', '992', '62', '49', '43', '39', '378', '379', '86', '886', '852', '853', '65', '850', '82', '93', '98', '48', '84', '856', '855', '254', '255', '256', '250', '257', '258', '252', '269', '243', '90', '998', '60', '222', '27', '265']
 for (let prefix of forbidPrefixes) {
@@ -166,13 +156,9 @@ if (m.sender.startsWith(prefix)) {
 await m.reply('*Anti Fakes* activo')
 client.groupParticipantsUpdate(m.chat, [m.sender], 'remove')}}}
   
-switch(prefix && command) {
+switch (prefix && command) {
 
-case 'bypass': {
-m.reply('`Comandos Fallando`\n\n- Imagen\n- Pinterest\n- Wallpaper\n- Wikipedia')
-}
-break
-
+//Herramientas 
 case 'traducir': 
 case 'translate': 
 case 'tr': {
@@ -191,7 +177,6 @@ if ((args[0] || '').length !== 2) {
 lang = defaultLang
 text = args.join(' ')
 m.reply('Se ha detectado que no has ingresado un *código* de *idioma* válido. Se usará el idioma predeterminado (Español).')
-
 }
 
 if (!text && m.quoted && m.quoted.text) text = m.quoted.text
@@ -207,33 +192,8 @@ const result2 = loll.result.translated
 await m.reply(`${result2}`)
 } catch (e) {
 await m.reply('No se pudo realizar la traducción: ' + e)
-}
-}
-}
+}}}
 break
-
-case 'google': 
-case 'googleit': {
-const google = require('google-it')
-
-if (!text) {
-return m.reply(`Ingrese algo *relevante* de lo que desea obtener *información*\n\n\`Ejemplo\`: ${prefix + command} Noticias n+`)
-}
-
-google({ 'query': text }).then(res => {
-let teks = `\t\t\t\t\t\t\t *‹* Google Search‘s *›*\n\n`
-res.forEach((g, index) => {
-teks += `\`${index + 1}\`\n\n`
-teks += `*· Título:* ${g.title}\n`
-teks += `*· Descripción:* ${g.snippet}\n`
-teks += `*· Enlace:* ${g.link}\n\n`
-})
-client.sendMessage(m.chat, { video: { url: 'https://qu.ax/cPnS.mp4' }, gifPlayback: true, caption: teks }, { quoted: m })
-}).catch(err => {
-m.reply('Ha ocurrido un error al realizar la búsqueda: ' + err)
-})
-break
-}
 
 case 'hd':
 case 'remini': 
@@ -263,15 +223,11 @@ return m.reply('Ha ocurrido un error al intentar mejorar la calidad de la imagen
 }
 break
 
-case 'ia':
-case 'chatgpt': {
-if (!text) {
-return m.reply(`Ingrese lo que *desea* preguntar a *ChatGPT*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
-}
-
+case 'ia': case 'chatgpt': {
+if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *ChatGPT*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
 try {
 client.sendPresenceUpdate('composing', from)
-const res = await axios.get(`https://deliriusapi-official.vercel.app/ia/gptweb?text=${text}`)
+const res = await axios.get(`${apis}/ia/gptweb?text=${text}`)
 await m.reply(res.data.gpt)
 } catch (e) {
 return m.reply('Ha ocurrido un error al solicitar su petición: ' + e)
@@ -279,6 +235,56 @@ return m.reply('Ha ocurrido un error al solicitar su petición: ' + e)
 }
 break
 
+case "gemini": {
+if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *Gemini*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
+client.sendPresenceUpdate('composing', from)
+let gpt = await fetch(`https://api.dorratz.com/ai/gemini?prompt=${text}`)
+let res = await gpt.json()
+await m.reply(res.message)}
+break
+
+case "copilot": case "bing": {
+if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *copilot*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
+client.sendPresenceUpdate('composing', from)
+let gpt = await fetch(`https://api.dorratz.com/ai/bing?prompt=${text}`)
+let res = await gpt.json()
+m.reply(res.result.ai_response)}
+break
+
+//buscadores
+case 'google': case 'googleit': {
+const google = require('google-it')
+if (!text) return m.reply(`Ingrese algo *relevante* de lo que desea obtener *información*\n\n\`Ejemplo\`: ${prefix + command} Noticias n+`)
+try {
+const res = await fetch(`${apis}/search/googlesearch?query=${encodeURIComponent(text)}`);
+const data = await res.json();
+    
+if (data.status && data.data && data.data.length > 0) {
+let teks = `\t\t\t\t\t\t\t *‹* Google Search‘s *›*\n\n`;
+for (let result of data.data) {
+teks += `*· Título:* ${result.title}\n*· Enlace:* ${result.url}\n*· Descripción:* ${result.description}\n\n─────────────────\n\n`;
+}                
+const ss = `https://image.thum.io/get/fullpage/https://google.com/search?q=${encodeURIComponent(text)}`;
+client.sendMessage(m.chat, { video: { url: 'https://qu.ax/cPnS.mp4' }, gifPlayback: true, caption: teks }, { quoted: m })
+}} catch (error) {
+try {
+google({ 'query': text }).then(res => {
+let teks = `\t\t\t\t\t\t\t *‹* Google Search‘s *›*\n\n`
+res.forEach((g, index) => {
+teks += `\`${index + 1}\`\n\n`
+teks += `*· Título:* ${g.title}\n`
+teks += `*· Descripción:* ${g.snippet}\n`
+teks += `*· Enlace:* ${g.link}\n\n`
+})
+client.sendMessage(m.chat, { video: { url: 'https://qu.ax/cPnS.mp4' }, gifPlayback: true, caption: teks }, { quoted: m })
+}).catch(err => {
+})
+} catch (e) {
+m.reply('Ha ocurrido un error al realizar la búsqueda: ' + e)
+}}}
+break
+
+//info
 case 'menu':
 case 'help':
 case 'allmenu': {
@@ -391,6 +397,7 @@ return m.reply(o)
 console.log(e)}}
 break 
 
+//enable on/off
 case 'on':
 case 'off': {
 if (!m.isGroup) {
@@ -479,6 +486,7 @@ break
 }
 break
 
+//descargar
 case 'play': {
 const fetch = require('node-fetch')
 const { ytmp3, ytmp4 } = require("@hiudyy/ytdl");
@@ -578,10 +586,10 @@ return m.reply('Ha ocurrido un error al intentar descargar sus archivos: ' + e)
 }
 break
 
-
 case 'tiktok': {
 const Tiktok = require('./lib/tiktok')
 const tiktok = new Tiktok()
+if (!text) return m.reply('Ingrese en enlace de un video de tiktok')
 if (args[0] === 'search') {
     const results = await tiktok.search(args.slice(1).join(' '))
     if (results.length === 0) return m.reply('No se encontraron resultados para la consulta proporcionada')
@@ -627,38 +635,29 @@ E S T A D O
 *· Favoritos* – ${video.favorite_count}
     
 ${global.wm}`
-    await client.sendMessage(m.chat, { video: { url: video.media.nowatermark }, caption: txt }, { quoted: m })
-    
-}
-
-
-}
+await client.sendMessage(m.chat, { video: { url: video.media.nowatermark }, caption: txt }, { quoted: m })
+}}
 break
 
 case 'facebook': 
 case 'fb': {
 const fetch = require('node-fetch')
 
-if (!text) {
-return m.reply('Ingrese un enlace de un *reel* de *Facebook*\n\n`Ejemplo`: .fb https://www.facebook.com/share/r/GB9op9yMyNUmFVH2/?mibextid=V2iOCx')
-}
-
-if (!text.includes('facebook')) {
-return m.reply('Enlace no válido. Compruebe el enlace')
-}
-
+if (!text) return m.reply('Ingrese un enlace de un *reel* de *Facebook*\n\n`Ejemplo`: .fb https://www.facebook.com/share/r/GB9op9yMyNUmFVH2/?mibextid=V2iOCx')
+if (!text.includes('facebook')) return m.reply('Enlace no válido. Compruebe el enlace')
 m.reply(mess.wait)
-
 try {
-const data = await fetch(`https://lolhuman.xyz/api/facebook?apikey=${lolkey}&url=${text}`)
-let video = await data.json()
-let buff = await video.result[0]
-
+const apiUrl = `https://api.dorratz.com/fbvideo?url=${text}`;
+const response = await fetch(apiUrl);
+const data = await response.json();
+if (data.result) {
+const hdUrl = data.result.hd;
+const sdUrl = data.result.sd;
+const audioUrl = data.result.audio;        
+const downloadUrl = hdUrl || sdUrl; 
 const caption = `Video de Facebook`
-
-await client.sendMessage(m.chat, { video: { url: buff }, mimetype: 'video/mp4', fileName: `video.mp4`, caption: caption, mentions: [m.sender], }, { quoted: m })
-
-} catch (e) {
+await client.sendMessage(m.chat, { video: { url: downloadUrl }, mimetype: 'video/mp4', fileName: `video.mp4`, caption: caption, mentions: [m.sender], }, { quoted: m })
+}} catch (e) {
 m.reply('Ha ocurrido un error al descargar su video: ' + e)
 }
 }
@@ -668,26 +667,26 @@ case 'instagram':
 case 'ig': {
 const fetch = require('node-fetch')
 
-if (!text) {
-return m.reply('Ingrese un enlace de un *reel* de *Instagram*\n\n`Ejemplo`: .ig https://www.instagram.com/reel/C8Z0mgHuD4d/?igsh=bzE0bGo0eHRxd2dx')
-}
-
-if (!text.includes('instagram')) {
-return m.reply('Enlace no válido. Compruebe el enlace')
-}
-
+if (!text) return m.reply('Ingrese un enlace de un *reel* de *Instagram*\n\n`Ejemplo`: .ig https://www.instagram.com/reel/C8Z0mgHuD4d/?igsh=bzE0bGo0eHRxd2dx')
+if (!text.includes('instagram')) return m.reply('Enlace no válido. Compruebe el enlace')
 m.reply(mess.wait)
-
 try {
-const data = await fetch(`https://lolhuman.xyz/api/instagram?apikey=${lolkey}&url=${text}`)
-let video = await data.json()
-let buff = await video.result[0]
-
+const apiUrl = `${apis}/download/instagram?url=${text}`;
+const apiResponse = await fetch(apiUrl);
+const delius = await apiResponse.json();
+if (!delius || !delius.data || delius.data.length === 0) return m.react("❌");
+const downloadUrl = delius.data[0].url;
+const fileType = delius.data[0].type;
 const caption = `Instagram 🍃`
+if (!downloadUrl) return m.react("❌");
 
-await client.sendMessage(m.chat, { video: { url: buff }, mimetype: 'video/mp4', fileName: `video.mp4`, caption: caption, mentions: [m.sender], }, { quoted: m })
-
-} catch (e) {
+if (fileType === 'image') {
+await client.sendMessage(m.chat, { image: { url: downloadUrl }, mimetype: 'video/mp4', fileName: `video.mp4`, caption: caption, mentions: [m.sender], }, { quoted: m })
+} else if (fileType === 'video') {
+await client.sendMessage(m.chat, { video: { url: downloadUrl }, mimetype: 'video/mp4', fileName: `video.mp4`, caption: caption, mentions: [m.sender], }, { quoted: m })
+} else {
+return m.reply("error")
+}} catch (e) {
 m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
 }
 }

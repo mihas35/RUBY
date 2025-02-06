@@ -16,6 +16,21 @@ global.session = 'session'
 global.vs = '2.0.0'
 global.author = 'zam'
 global.lolkey = 'GataDiosV3'
+global.apis = 'https://delirius-apiofc.vercel.app'
+
+global.mess = {
+admin: 'Debes ser administrador para ejecutar esta función',
+botAdmin: 'El bot debe ser administrador para ejecutar la función',
+owner: 'Solo mi propietario puede hacer uso de este comando',
+group: 'Esta función sólo funciona en chats grupales', 
+private: 'Esta función sólo funciona en chats privados',
+wait: '`Cargando...`'
+}
+
+global.link = 'https://whatsapp.com/channel/0029VaB4w2ZFHWpwgyEe3w2k'
+global.fotos = 'https://qu.ax/lFTW.jpeg'
+global.Title = wm
+global.Body = 'Zam'
 
 // IDs de canales
 global.ch = {
