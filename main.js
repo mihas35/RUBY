@@ -32,6 +32,17 @@ module.exports = client = async (client, m, mesaages, store) => {
 try {
 const { type, quotedMsg, mentioned, now, fromMe } = m
 var body = (m.mtype === 'conversation') ? m.message.conversation : (m.mtype == 'imageMessage') ? m.message.imageMessage.caption : (m.mtype == 'videoMessage') ? m.message.videoMessage.caption : (m.mtype == 'extendedTextMessage') ? m.message.extendedTextMessage.text : (m.mtype == 'buttonsResponseMessage') ? m.message.buttonsResponseMessage.selectedButtonId : (m.message.listResponseMessage && m.message.listResponseMessage.singleSelectReply.selectedRowId.startsWith('.') && m.message.listResponseMessage.singleSelectReply.selectedRowId) ? m.message.listResponseMessage.singleSelectReply.selectedRowId : (m.mtype == 'templateButtonReplyMessage') ? m.message.templateButtonReplyMessage.selectedId : (m.mtype === 'messageContextInfo') ? (m.message.buttonsResponseMessage?.selectedButtonId || m.message.listResponseMessage?.singleSelectReply.selectedRowId || m.text) : ''
+
+m.isBot = m.id.startsWith('BAE5') && m.id.length === 16 || m.id.startsWith('3EB0') && m.id.length === 12 || m.id.startsWith('3EB0') && (m.id.length === 20 || m.id.length === 22) || m.id.startsWith('B24E') && m.id.length === 20;
+if (m.isBot) return 
+
+/**
+ * Returns early if ID starts with 'NJX-' due to Baileys' different generateId system.
+ * @param {Object} m - The object containing the ID to check.
+ * @returns {void} - Returns early if ID starts with 'NJX-', otherwise continues with the function.
+ */
+if (m.id.startsWith('NJX-')) return;
+
 var budy = (typeof m.text == 'string' ? m.text : '')
 var prefix = prefa ? /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.©^]/gi.test(body) ? body.match(/^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.©^]/gi)[0] : '' : prefa ?? global.prefix
 
@@ -227,11 +238,18 @@ case 'ia': case 'chatgpt': {
 if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *ChatGPT*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
 try {
 client.sendPresenceUpdate('composing', from)
-const res = await axios.get(`${apis}/ia/gptweb?text=${text}`)
-await m.reply(res.data.gpt)
+let gpt = await fetch(`${apis}/ia/gptweb?text=${text}`) 
+let res = await gpt.json()
+await m.reply(res.gpt)
 } catch (e) {
 return m.reply('Ha ocurrido un error al solicitar su petición: ' + e)
-}
+}}
+break
+
+case "deepseek": case "ia3": {
+if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *DeepSeek-AI*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
+let { data } = await axios.get(`https://archive-ui.tanakadomp.biz.id/ai/deepseek?text=${text}`)
+await m.reply(data?.result || '❌ No se obtuvo una respuesta válida de DeepSeek AI.')
 }
 break
 
