@@ -3,6 +3,8 @@
 require('./settings.js')
 const { default: makeWASocket,  generateWAMessage,  downloadContentFromMessage,  emitGroupParticipantsUpdate,  emitGroupUpdate,  makeInMemoryStore,  prepareWAMessageMedia, MediaType,  WAMessageStatus, AuthenticationState, GroupMetadata, initInMemoryKeyStore, MiscMessageGenerationOptions,  useMultiFileAuthState, BufferJSON,  WAMessageProto,  MessageOptions,	 WAFlag,  WANode,	 WAMetric,	 ChatModification,  MessageTypeProto,  WALocationMessage, ReconnectMode,  WAContextInfo,  proto,	 WAGroupMetadata,  ProxyAgent,	 waChatKey,  MimetypeMap,  MediaPathMap,  WAContactMessage,  WAContactsArrayMessage,  WAGroupInviteMessage,  WATextMessage,  WAMessageContent,  WAMessage,  BaileysError,  WA_MESSAGE_STATUS_TYPE,  MediaConnInfo,   generateWAMessageContent, URL_REGEX,  Contact, WAUrlInfo,  WA_DEFAULT_EPHEMERAL,  WAMediaUpload,  mentionedJid,  processTime,	 Browser,  MessageType,  Presence,  WA_MESSAGE_STUB_TYPES,  Mimetype,  relayWAMessage,	 Browsers,  GroupSettingChange,  delay,  DisconnectReason,  WASocket,  getStream,  WAProto,  isBaileys,  AnyMessageContent,  generateWAMessageFromContent, fetchLatestBaileysVersion,  processMessage,  processingMutex,  jidDecode,  areJidsSameUser } = require('@whiskeysockets/baileys')
 let pino = require('pino')
+const path = require('path');
+const { Low, JSONFile } = require('lowdb');
 const fs = require('fs')
 const axios = require('axios')
 const { exec, spawn, execSync } = require('child_process')
@@ -121,7 +123,140 @@ console.log(err)
 }
 })
   
-var low
+//batabase  
+global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
+const databasePath = path.join(__dirname, 'database');
+if (!fs.existsSync(databasePath)) {
+    fs.mkdirSync(databasePath);
+}
+
+const usersPath = path.join(databasePath, 'users');
+const chatsPath = path.join(databasePath, 'chats');
+const settingsPath = path.join(databasePath, 'settings');
+const msgsPath = path.join(databasePath, 'msgs');
+const stickerPath = path.join(databasePath, 'sticker');
+const statsPath = path.join(databasePath, 'stats');
+
+if (!fs.existsSync(usersPath)) fs.mkdirSync(usersPath);
+if (!fs.existsSync(chatsPath)) fs.mkdirSync(chatsPath);
+if (!fs.existsSync(settingsPath)) fs.mkdirSync(settingsPath);
+if (!fs.existsSync(msgsPath)) fs.mkdirSync(msgsPath);
+if (!fs.existsSync(stickerPath)) fs.mkdirSync(stickerPath);
+if (!fs.existsSync(statsPath)) fs.mkdirSync(statsPath);
+
+function getFilePath(basePath, id) {
+    return path.join(basePath, `${id}.json`);
+}
+
+global.db = {
+    data: {
+        users: {},
+        chats: {},
+        settings: {},
+        msgs: {},
+        sticker: {},
+        stats: {},
+    },
+    chain: null,
+};
+
+global.loadDatabase = async function loadDatabase() {
+    const userFiles = fs.readdirSync(usersPath);
+    for (const file of userFiles) {
+        const userId = path.basename(file, '.json');
+        const userDb = new Low(new JSONFile(getFilePath(usersPath, userId)));
+        await userDb.read();
+        userDb.data = userDb.data || {};
+        global.db.data.users[userId] = userDb.data;
+    }
+
+    const chatFiles = fs.readdirSync(chatsPath);
+    for (const file of chatFiles) {
+        const chatId = path.basename(file, '.json');
+        const chatDb = new Low(new JSONFile(getFilePath(chatsPath, chatId)));
+        await chatDb.read();
+        chatDb.data = chatDb.data || {};
+        global.db.data.chats[chatId] = chatDb.data;
+    }
+
+    const settingsFiles = fs.readdirSync(settingsPath);
+    for (const file of settingsFiles) {
+        const settingId = path.basename(file, '.json');
+        const settingDb = new Low(new JSONFile(getFilePath(settingsPath, settingId)));
+        await settingDb.read();
+        settingDb.data = settingDb.data || {};
+        global.db.data.settings[settingId] = settingDb.data;
+    }
+
+    const msgsFiles = fs.readdirSync(msgsPath);
+    for (const file of msgsFiles) {
+        const msgId = path.basename(file, '.json');
+        const msgDb = new Low(new JSONFile(getFilePath(msgsPath, msgId)));
+        await msgDb.read();
+        msgDb.data = msgDb.data || {};
+        global.db.data.msgs[msgId] = msgDb.data;
+    }
+
+    const stickerFiles = fs.readdirSync(stickerPath);
+    for (const file of stickerFiles) {
+        const stickerId = path.basename(file, '.json');
+        const stickerDb = new Low(new JSONFile(getFilePath(stickerPath, stickerId)));
+        await stickerDb.read();
+        stickerDb.data = stickerDb.data || {};
+        global.db.data.sticker[stickerId] = stickerDb.data;
+    }
+
+    const statsFiles = fs.readdirSync(statsPath);
+    for (const file of statsFiles) {
+        const statId = path.basename(file, '.json');
+        const statDb = new Low(new JSONFile(getFilePath(statsPath, statId)));
+        await statDb.read();
+        statDb.data = statDb.data || {};
+        global.db.data.stats[statId] = statDb.data;
+    }
+};
+
+global.db.save = async function saveDatabase() {
+    for (const [userId, userData] of Object.entries(global.db.data.users)) {
+        const userDb = new Low(new JSONFile(getFilePath(usersPath, userId)));
+        userDb.data = userData;
+        await userDb.write();
+    }
+
+    for (const [chatId, chatData] of Object.entries(global.db.data.chats)) {
+        const chatDb = new Low(new JSONFile(getFilePath(chatsPath, chatId)));
+        chatDb.data = chatData;
+        await chatDb.write();
+    }
+
+    for (const [settingId, settingData] of Object.entries(global.db.data.settings)) {
+        const settingDb = new Low(new JSONFile(getFilePath(settingsPath, settingId)));
+        settingDb.data = settingData;
+        await settingDb.write();
+    }
+
+    for (const [msgId, msgData] of Object.entries(global.db.data.msgs)) {
+        const msgDb = new Low(new JSONFile(getFilePath(msgsPath, msgId)));
+        msgDb.data = msgData;
+        await msgDb.write();
+    }
+
+    for (const [stickerId, stickerData] of Object.entries(global.db.data.sticker)) {
+        const stickerDb = new Low(new JSONFile(getFilePath(stickerPath, stickerId)));
+        stickerDb.data = stickerData;
+        await stickerDb.write();
+    }
+
+    for (const [statId, statData] of Object.entries(global.db.data.stats)) {
+        const statDb = new Low(new JSONFile(getFilePath(statsPath, statId)));
+        statDb.data = statData;
+        await statDb.write();
+    }
+};
+
+loadDatabase();
+  
+/*var low
 try {
 low = require('lowdb')
 } catch (e) {
@@ -150,7 +285,7 @@ global.db.chain = _.chain(global.db.data)}
 loadDatabase()
 if (global.db) setInterval(async () => {
 if (global.db.data) await global.db.write()
-}, 1 * 1000)
+}, 1 * 1000)*/
 
 function clearTmp() {
 const tmp = [tmpdir(), join(__dirname, './tmp')]
@@ -167,7 +302,7 @@ return false
 if (!opts['test']) { 
 if (global.db) { 
 setInterval(async () => { 
-if (global.db.data) await global.db.write() 
+if (global.db.data) await global.db.save()
 if (opts['autocleartmp'] && (global.support || {}).find) (tmp = [os.tmpdir(), 'tmp'], tmp.forEach((filename) => cp.spawn('find', [filename, '-amin', '3', '-type', 'f', '-delete'])))
 }, 30 * 1000)
 }}

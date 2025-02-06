@@ -21,7 +21,7 @@ const ytdl = require('ytdl-core')
 const FormData = require('form-data') 
 const { youtubedl, youtubedlv2 } = require('@bochilteam/scraper');
 const { WA_DEFAULT_EPHEMERAL, getAggregateVotesInPollMessage, generateWAMessageFromContent,  proto,  generateWAMessageContent, generateWAMessage,  prepareWAMessageMedia,  downloadContentFromMessage,  areJidsSameUser,  getContentType } = require('@whiskeysockets/baileys')
-const {  smsg,  getGroupAdmins,  clockString,  sleep,  getBuffer,  fetchJson, isUrl } = require('./lib/func')
+const {  smsg,  getGroupAdmins,  clockString,  sleep,  getBuffer, runtime, fetchJson, isUrl } = require('./lib/func')
 require('./settings.js')
 
 const msgs = (message) => {
@@ -103,6 +103,17 @@ antifake: false,
 detect: true, 	
 mute: false
 }
+let setting = global.db.data.settings[client.user.jid]
+if (typeof setting !== 'object') global.db.data.settings[client.user.jid] = {}  
+if (setting) {  
+if (!isNumber(setting.status)) setting.status = 0  
+if (!('self' in setting)) setting.self = false;
+if (!('autobio' in setting)) setting.autobio = true
+} else global.db.data.settings[client.user.jid] = {  
+status: 0,  
+self: false,
+autobio: true
+} 
 
 //console
 if (m.message) {
@@ -113,6 +124,21 @@ const remitente = chalk.bold.redBright(`\nRemitente: ${gradient('deepskyblue', '
 const grupo = m.isGroup ? chalk.bold.cyanBright(`\nGrupo: ${chalk.greenBright(groupName)}\nID: ${gradient('violet', 'midnightblue')(from)}`) : chalk.bold.redBright('\nChat privado\n')
 console.log(`${fecha}${mensaje}${usuario}${remitente}${grupo}`)
 }
+
+//--------------------[ AUTOBIO ]----------------------- 
+if (global.db.data.settings[client.user.jid].autobio) {
+let setting = global.db.data.settings[client.user.jid]
+if (new Date() * 1 - setting.status > 1000) {
+let uptime = await runtime(process.uptime())
+var timestamp = speed();   
+var latensi = speed() - timestamp 
+let bio = `${wm} || 💻 ${runtime(process.uptime())} || 👥️ ${Object.keys(global.db.data.users).length}`
+try {
+await client.updateProfileStatus(bio)
+setting.status = new Date() * 1 
+} catch {
+console.log(latensi.toFixed(4)) 
+}}} 
 
 //interactive button
 if (m.mtype === 'interactiveResponseMessage') {   
@@ -283,7 +309,6 @@ let teks = `\t\t\t\t\t\t\t *‹* Google Search‘s *›*\n\n`;
 for (let result of data.data) {
 teks += `*· Título:* ${result.title}\n*· Enlace:* ${result.url}\n*· Descripción:* ${result.description}\n\n─────────────────\n\n`;
 }                
-const ss = `https://image.thum.io/get/fullpage/https://google.com/search?q=${encodeURIComponent(text)}`;
 client.sendMessage(m.chat, { video: { url: 'https://qu.ax/cPnS.mp4' }, gifPlayback: true, caption: teks }, { quoted: m })
 }} catch (error) {
 try {
