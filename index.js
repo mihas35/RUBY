@@ -21,6 +21,7 @@ const { join } = require('path')
 const PhoneNumber = require('awesome-phonenumber')
 const { smsg, sleep } = require('./lib/func')
 const { readdirSync, statSync, unlinkSync } = require('fs')
+const { Low, JSONFile } = require('lowdb');
 const { say } = cfonts
 const color = (text, color) => {
 return !color ? chalk.green(text) : color.startsWith('#') ? chalk.hex(color)(text) : chalk.keyword(color)(text)
@@ -124,14 +125,6 @@ console.log(err)
   
 //batabase  
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
-
-let Low, JSONFile;
-import('lowdb').then(module => {
-    Low = module.Low;
-    JSONFile = module.JSONFile;
-}).catch(err => {
-    console.error('Error al cargar lowdb:', err);
-});
 
 const databasePath = path.join(__dirname, 'database');
 if (!fs.existsSync(databasePath)) {
