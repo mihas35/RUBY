@@ -2,7 +2,6 @@ const fs = require('fs')
 const chalk = require('chalk')
 
 global.owner = [
-['5214434703586', true], 
 ['5214774444444'],
 ['5492266613038'], 
 ['573147616444'],
