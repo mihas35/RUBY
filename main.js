@@ -238,7 +238,7 @@ case 'ia': case 'chatgpt': {
 if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *ChatGPT*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
 try {
 client.sendPresenceUpdate('composing', from)
-let gpt = await fetch(`${apis}/ia/gptweb?text=${text}`) 
+let gpt = await fetch(`${global.apis}/ia/gptweb?text=${text}`) 
 let res = await gpt.json()
 await m.reply(res.gpt)
 } catch (e) {
@@ -248,6 +248,7 @@ break
 
 case "deepseek": case "ia3": {
 if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *DeepSeek-AI*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
+client.sendPresenceUpdate('composing', from)
 let { data } = await axios.get(`https://archive-ui.tanakadomp.biz.id/ai/deepseek?text=${text}`)
 await m.reply(data?.result || '❌ No se obtuvo una respuesta válida de DeepSeek AI.')
 }
@@ -1247,7 +1248,7 @@ reject(err)
 		
 default:
      
-if (budy.startsWith('_')) {
+if (budy.startsWith('>')) {
     if(!isCreator) return
     let evan
     let text = /await|return/gi.test(budy) ? `(async () => { ${budy.slice(1)} })()` : `${budy.slice(1)}`
