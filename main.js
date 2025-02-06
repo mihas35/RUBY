@@ -515,7 +515,7 @@ const audiodl = await youtubedl(url).catch(async _ => await youtubedlv2(url))
 audioUrl = await audiodl.video[c].download()
 const ytMsg = `\`YouTube - ${query}\`\n\nTítulo: *${video.title}*\nVistas: *${video.views}*\nDuración: *${video.timestamp}*\nEnlace: ${url}\nDescripción: ${video.description}\n\n> Enviando ${selection}`
 await client.sendMessage(m.chat, { image: { url: `${video.thumbnail}` }, caption: ytMsg }, { quoted: m })
-const audiodlp = await ytmp3(yt_play[0].url);
+const audiodlp = await ytmp3(url);
 client.sendMessage(m.chat, { audio: audiodlp, mimetype: "audio/mpeg" }, { quoted: m });
 break
 }
@@ -524,7 +524,7 @@ const videodl = await youtubedl(url).catch(async _ => await youtubedlv2(url))
 videoUrl = await videodl.video['360p'].download()
 const ytMsg = `\`YouTube - ${query}\`\n\nTítulo: *${video.title}*\nVistas: *${video.views}*\nDuración: *${video.timestamp}*\nEnlace: ${url}\nDescripción: ${video.description}\n\n> Enviando ${selection}`
 await client.sendMessage(m.chat, { image: { url: `${video.thumbnail}` }, caption: ytMsg }, { quoted: m })
-const video = await ytmp4(text);
+const video = await ytmp4(url);
 await client.sendMessage(m.chat, { video: { url: video }, fileName: `video.mp4`, mimetype: 'video/mp4', caption: `Video de YouTube`}, { quoted: m })
 break
 }
