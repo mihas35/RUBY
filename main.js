@@ -238,9 +238,9 @@ case 'ia': case 'chatgpt': {
 if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *ChatGPT*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
 try {
 client.sendPresenceUpdate('composing', from)
-let gpt = await fetch(`https://delirius-apiofc.vercel.app/ia/gptweb?text=${text}`) 
+let gpt = await fetch(`${apis}/ia/gptweb?text=${text}`) 
 let res = await gpt.json()
-await m.reply(res.gpt)
+await await m.reply(res.data)
 } catch (e) {
 return m.reply('Ha ocurrido un error al solicitar su petición: ' + e)
 }}
@@ -690,7 +690,7 @@ if (!text) return m.reply('Ingrese un enlace de un *reel* de *Instagram*\n\n`Eje
 if (!text.includes('instagram')) return m.reply('Enlace no válido. Compruebe el enlace')
 m.reply(mess.wait)
 try {
-const apiUrl = `https://delirius-apiofc.vercel.app/download/instagram?url=${text}`;
+const apiUrl = `${apis}/download/instagram?url=${text}`;
 const apiResponse = await fetch(apiUrl);
 const delius = await apiResponse.json();
 if (!delius || !delius.data || delius.data.length === 0) return m.react("❌");
