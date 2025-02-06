@@ -328,6 +328,39 @@ m.reply('Ha ocurrido un error al realizar la búsqueda: ' + e)
 }}}
 break
 
+case 'yts':
+case 'ytsearch': {
+if (!text) {
+return m.reply('Ingrese el *título* de un *vídeo*\n\n`Ejemplo`: .yts CuriosityBot-MD')
+}
+
+let ress = await yts(`${text}`)
+let armar = ress.all
+const Ibuff = await getBuffer(armar[0].image)
+let teks2 = armar.map(v => {
+switch (v.type) {
+case 'video': return `
+Título: *${v.title}* 
+Duración: ${v.timestamp}
+Subido: ${v.ago}
+Vistas: ${v.views}
+Url: ${v.url}
+`.trim()
+case 'channel': return `
+Canal: *${v.name}*
+Url: ${v.url}
+Subscriptores: ${v.subCountLabel} (${v.subCount})
+Videos totales: ${v.videoCount}
+`.trim()
+}
+}).filter(v => v).join('\n----------------------------------------\n')
+client.sendMessage(m.chat, { image: Ibuff, caption: teks2 }, { quoted: m })
+.catch((err) => {
+m.reply('Error')
+})
+}
+break
+
 //info
 case 'menu':
 case 'help':
@@ -776,6 +809,7 @@ m.reply('Ha ocurrido un error al descargar su documento: ' + e)
 }
 break
 
+//grupos
 case 'admins': 
 case 'admin': {
 if (!m.isGroup) {
@@ -1054,38 +1088,47 @@ client.sendMessage(m.chat, { text: teks, mentions: participants.map(a => a.id) }
 }
 break 
 		
-case 'yts':
-case 'ytsearch': {
-if (!text) {
-return m.reply('Ingrese el *título* de un *vídeo*\n\n`Ejemplo`: .yts CuriosityBot-MD')
-}
+//propietarios 		
+case "backup": {
+const archiver = require('archiver');
+try {
+let d = new Date();
+let date = d.toLocaleDateString('fr', {day: 'numeric',
+month: 'long',
+year: 'numeric'
+});
 
-let ress = await yts(`${text}`)
-let armar = ress.all
-const Ibuff = await getBuffer(armar[0].image)
-let teks2 = armar.map(v => {
-switch (v.type) {
-case 'video': return `
-Título: *${v.title}* 
-Duración: ${v.timestamp}
-Subido: ${v.ago}
-Vistas: ${v.views}
-Url: ${v.url}
-`.trim()
-case 'channel': return `
-Canal: *${v.name}*
-Url: ${v.url}
-Subscriptores: ${v.subCountLabel} (${v.subCount})
-Videos totales: ${v.videoCount}
-`.trim()
+const databaseFolder = './database'; 
+const zipPath = './database_backup.zip';
+const credsPath = './session/creds.json';
+
+if (!fs.existsSync(databaseFolder)) return await m.reply('⚠️ La carpeta *database* no existe.');      
+if (!fs.existsSync(credsPath)) return await m.reply('⚠️ El archivo *creds.json* no existe.');      
+
+await m.reply(`_*🗂️ Preparando envío de base de datos...*_`)
+
+let output = fs.createWriteStream(zipPath);
+let archive = archiver('zip', { zlib: { level: 9 } });
+
+output.on('close', async () => {
+console.log(`Archivo .zip creado: ${archive.pointer()} bytes`);
+
+let creds = fs.readFileSync(credsPath);
+await client.sendMessage(m.sender, {document: fs.readFileSync(zipPath), mimetype: 'application/zip',fileName: `database.zip`}, {quoted: m});
+await client.sendMessage(m.sender, {document: creds, mimetype: 'application/json', fileName: `creds.json`}, {quoted: m});
+fs.unlinkSync(zipPath);
+});
+
+archive.on('error', (err) => { throw err; });
+archive.pipe(output);
+archive.directory(databaseFolder, false);
+archive.finalize();
+} catch (e) {
+console.log(e);
+await client.sendMessage(m.sender, '❌ Ha ocurrido un error durante el backup.\n\n' + e, { quoted: m });
 }
-}).filter(v => v).join('\n----------------------------------------\n')
-client.sendMessage(m.chat, { image: Ibuff, caption: teks2 }, { quoted: m })
-.catch((err) => {
-m.reply('Error')
-})
 }
-break
+break;
 
 case 'getcase': {
 if (!isCreator) {
@@ -1098,7 +1141,7 @@ return m.reply('Ingrese el *comando* que desea obtener *código*\n\n`Ejemplo`: .
 
 try {
 bbreak = 'break'
-m.reply('case ' + `'${args[0]}'` + fs.readFileSync('./curiosity.js').toString().split(`case '${args[0]}'`)[1].split(bbreak)[0] + bbreak)
+m.reply('case ' + `'${args[0]}'` + fs.readFileSync('./main.js').toString().split(`case '${args[0]}'`)[1].split(bbreak)[0] + bbreak)
 } catch (e) { 
 m.reply('Ha ocurrido un error al obtener el código: ' + e)
 } 
@@ -1115,8 +1158,8 @@ return m.reply('Ingrese el *código* que desea agregar como *comando*')
 }
 
 try {
-const addcase =[fs.readFileSync('curiosity.js', 'utf8').slice(0, fs.readFileSync('curiosity.js', 'utf8').lastIndexOf('break') + 5), q, fs.readFileSync('curiosity.js', 'utf8').slice(fs.readFileSync('curiosity.js', 'utf8').lastIndexOf('break') + 5)].join('\n')
-fs.writeFileSync('curiosity.js', addcase)
+const addcase =[fs.readFileSync('main.js', 'utf8').slice(0, fs.readFileSync('main.js', 'utf8').lastIndexOf('break') + 5), q, fs.readFileSync('main.js', 'utf8').slice(fs.readFileSync('main.js', 'utf8').lastIndexOf('break') + 5)].join('\n')
+fs.writeFileSync('main.js', addcase)
 m.reply(`Comando:\n${text}\nAgregado con éxito.`) 
 } catch (e) {
 return m.reply('Ha ocurrido un error al agregar su comando: ' + e)
@@ -1183,6 +1226,7 @@ await m.reply(errorMessage2)
 }
 break
 
+//sticker
 case 's': case 'sticker': {
 const d = new Date(new Date + 3600000)
 const locale = 'es-ES'
