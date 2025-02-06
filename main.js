@@ -238,7 +238,7 @@ case 'ia': case 'chatgpt': {
 if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *ChatGPT*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
 try {
 client.sendPresenceUpdate('composing', from)
-let gpt = await fetch(`${global.apis}/ia/gptweb?text=${text}`) 
+let gpt = await fetch(`https://delirius-apiofc.vercel.app/ia/gptweb?text=${text}`) 
 let res = await gpt.json()
 await m.reply(res.gpt)
 } catch (e) {
@@ -275,7 +275,7 @@ case 'google': case 'googleit': {
 const google = require('google-it')
 if (!text) return m.reply(`Ingrese algo *relevante* de lo que desea obtener *información*\n\n\`Ejemplo\`: ${prefix + command} Noticias n+`)
 try {
-const res = await fetch(`${apis}/search/googlesearch?query=${encodeURIComponent(text)}`);
+const res = await fetch(`https://delirius-apiofc.vercel.app/search/googlesearch?query=${text}`);
 const data = await res.json();
     
 if (data.status && data.data && data.data.length > 0) {
@@ -690,7 +690,7 @@ if (!text) return m.reply('Ingrese un enlace de un *reel* de *Instagram*\n\n`Eje
 if (!text.includes('instagram')) return m.reply('Enlace no válido. Compruebe el enlace')
 m.reply(mess.wait)
 try {
-const apiUrl = `${apis}/download/instagram?url=${text}`;
+const apiUrl = `https://delirius-apiofc.vercel.app/download/instagram?url=${text}`;
 const apiResponse = await fetch(apiUrl);
 const delius = await apiResponse.json();
 if (!delius || !delius.data || delius.data.length === 0) return m.react("❌");
