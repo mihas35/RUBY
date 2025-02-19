@@ -775,6 +775,12 @@ case 'ig': {
         const media = input => input === 'jpg' ? 'image' : input === 'mp4' ? 'video' : false
 
         if (dec(result) === 'object' && media(result.url[0].type)) {
+            const txt = `*· Título:* ${result.meta.title || 'Sin título'}
+*· Me gusta* – ${result.meta.like_count}
+*· Comentarios* – ${result.meta.comment_count}
+*· Creador* – ${result.meta.username}
+                
+${global.wm}`
             await client.sendMessage(m.chat, { [media(result.url[0].type)]: { url: result.url[0].url } })
         }
     } catch (e) {
