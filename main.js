@@ -776,6 +776,7 @@ case 'ig': {
 
         if (dec(result) === 'object' && result.url && result.url.length > 0) {
             const fileType = media(result.url[0].type)
+            m.reply(fileType)
             if (fileType) {
                 await client.sendMessage(m.chat, { [fileType]: result.url[0].url })
             } else {
