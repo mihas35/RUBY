@@ -772,9 +772,9 @@ case 'ig': {
 
         const result = await ig(text)
         const dec = input => Array.isArray(input) ? 'array' : (input && typeof input === 'object' ? 'object' : 'unknown')
-        const media = str => /\.jpg$/i.test(str) ? 'image' : (/\.mp4$/i.test(str) ? 'video' : false)
+        const media = str => input => input === 'jpg' ? 'image' : input === 'mp4' ? 'video' : false
 
-        if (dec(result) === 'object') {
+        if (dec(result) === 'object' && media(result.url[0].type)) {
             await client.sendMessage(m.chat, { [media(result.url[0].type)]: result.url[0].url })
         }
     } catch (e) {
