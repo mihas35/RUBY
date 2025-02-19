@@ -49,7 +49,7 @@ var prefix = prefa ? /^[°•π÷×¶∆£¢€¥®™+✓_=|~!?@#$%^&.©^]/gi.t
 
 const command = body.slice(prefix.length).trim().split(/\s+/)[0].toLowerCase()
 const args = body.trim().split(/\s+/).slice(1)
-const chatContent = (() => { 
+const chatContent = (() => {
 const messageTypes = { 'conversation': m.message.conversation, 'imageMessage': m.message.imageMessage?.caption, 'documentMessage': m.message.documentMessage?.caption, 'videoMessage': m.message.videoMessage?.caption, 'extendedTextMessage': m.message.extendedTextMessage?.text, 'buttonsResponseMessage': m.message.buttonsResponseMessage?.selectedButtonId, 'templateButtonReplyMessage': m.message.templateButtonReplyMessage?.selectedId, 'listResponseMessage': m.message.listResponseMessage?.singleSelectReply?.selectedRowId, 'messageContextInfo': m.message.listResponseMessage?.singleSelectReply?.selectedRowId }; return messageTypes[m.mtype] || '' })()
 const pushname = m.pushName || 'Sin nombre'
 const text = args.join(' ')
@@ -770,7 +770,16 @@ case 'ig': {
             return a8
         }
 
-        m.reply(JSON.stringify(await ig(text), null, 2))
+        const result = await ig(text)
+        const dec = input => Array.isArray(input) ? 'array' : (input && typeof input === 'object' ? 'object' : 'unknown')
+        const media = str => /\.jpg$/i.test(str) ? 'image' : (/\.mp4$/i.test(str) ? 'video' : false)
+
+        if (dec(result) === 'object') {
+            const fileType = media(result.url[0].type);
+            if (fileType) {
+                await client.sendMessage(m.chat, { [fileType]: result.url[0].url })
+            }
+        }
         
     } catch (e) {
         m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
