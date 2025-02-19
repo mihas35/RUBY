@@ -766,7 +766,7 @@ case 'ig': {
                     'Origin': atob('aHR0cHM6Ly9zc3NpbnN0YWdyYW0uY29tLw==')
                 }
             })
-            
+
             return a8
         }
 
@@ -774,19 +774,18 @@ case 'ig': {
         const dec = input => Array.isArray(input) ? 'array' : (input && typeof input === 'object' ? 'object' : 'unknown')
         const media = str => /\.jpg$/i.test(str) ? 'image' : (/\.mp4$/i.test(str) ? 'video' : false)
 
-        if (dec(result) === 'object') {
-            const fileType = media(result.url[0].type);
+        if (dec(result) === 'object' && result.url && result.url.length > 0) {
+            const fileType = media(result.url[0].type)
             if (fileType) {
                 await client.sendMessage(m.chat, { [fileType]: result.url[0].url })
             } else {
-                m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
+                m.reply('Ha ocurrido un error al procesar el tipo de archivo.')
             }
         } else {
-            m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
+            m.reply('Ha ocurrido un error: el resultado no es un objeto válido.')
         }
-        
     } catch (e) {
-        m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
+        m.reply('Ha ocurrido un error al descargar su solicitud: ' + e.message)
     }
 }
 break
