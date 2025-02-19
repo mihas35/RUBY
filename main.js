@@ -778,7 +778,11 @@ case 'ig': {
             const fileType = media(result.url[0].type);
             if (fileType) {
                 await client.sendMessage(m.chat, { [fileType]: result.url[0].url })
+            } else {
+                m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
             }
+        } else {
+            m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
         }
         
     } catch (e) {
