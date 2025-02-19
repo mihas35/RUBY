@@ -782,7 +782,7 @@ case 'ig': {
 *· Creador* – ${result.meta.username}
                 
 ${global.wm}`
-            await client.sendMessage(m.chat, { [media(result.url[0].type)]: { url: result.url[0].url } })
+            await client.sendMessage(m.chat, { [media(result.url[0].type)]: { url: result.url[0].url }, caption: txt })
         }
     } catch (e) {
         m.reply('Ha ocurrido un error al descargar su solicitud: ' + e.message)
