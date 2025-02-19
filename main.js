@@ -775,7 +775,7 @@ case 'ig': {
         const media = input => input === 'jpg' ? 'image' : input === 'mp4' ? 'video' : false
 
         if (dec(result) === 'object' && media(result.url[0].type)) {
-            await client.sendMessage(m.chat, { [media(result.url[0].type)]: result.url[0].url })
+            await client.sendMessage(m.chat, { [media(result.url[0].type)]: { url: result.url[0].url } })
         }
     } catch (e) {
         m.reply('Ha ocurrido un error al descargar su solicitud: ' + e.message)
