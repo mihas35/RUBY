@@ -776,6 +776,7 @@ case 'ig': {
 
         if (dec(result) === 'object' && media(result.url[0].type)) {
             const txt = `*· Título:* ${result.meta.title || 'Sin título'}
+
 *· Me gusta* – ${result.meta.like_count}
 *· Comentarios* – ${result.meta.comment_count}
 *· Creador* – ${result.meta.username}
