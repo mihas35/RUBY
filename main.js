@@ -743,30 +743,38 @@ break
 
 case 'instagram':
 case 'ig': {
-const fetch = require('node-fetch')
+    if (!text) return m.reply('Ingrese un enlace de un *reel* de *Instagram*\n\n`Ejemplo`: .ig https://www.instagram.com/reel/C8Z0mgHuD4d/?igsh=bzE0bGo0eHRxd2dx')
+    if (!text.includes('instagram')) return m.reply('Enlace no válido. Compruebe el enlace')
+    m.reply(mess.wait)
+    try {
+        async function ig(a1) {
+            const { data: a2 } = await axios.get(atob('aHR0cHM6Ly9zc3NpbnN0YWdyYW0uY29tL21zZWM='))
+            const a3 = Math.floor(a2.msec * 1e3) || Date.now()
+            const a4 = Date.now() - (a3 ? Date.now() - a3 : 0)
+            
+            const a5 = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${a1}${a4}${atob('MTllMDhmZjQyZjE4NTU5YjUxODI1Njg1ZDkxN2M1YzllOWQ4OWY4YTVjMWFiMTQ3ZjgyMGY0NmU5NGMzZGYyNg==')}`))
+            const a6 = Array.from(new Uint8Array(a5)).map(a7 => a7.toString(16).padStart(2, '0')).join('')
+            
+            const { data: a8 } = await axios.post(atob('aHR0cHM6Ly9zc3NpbnN0YWdyYW0uY29tL2FwaS9jb252ZXJ0'), {
+                url: a1, ts: a4, _ts: 1739186038417, _tsc: Date.now() - a3, _s: a6
+            }, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'User-Agent': atob('TW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyMC4wLjAuMCBTYWZhcmkvNTM3LjM2'),
+                    'Referer': atob('aHR0cHM6Ly9zc3NpbnN0YWdyYW0uY29tLw=='),
+                    'Origin': atob('aHR0cHM6Ly9zc3NpbnN0YWdyYW0uY29tLw==')
+                }
+            })
+            
+            return a8
+        }
 
-if (!text) return m.reply('Ingrese un enlace de un *reel* de *Instagram*\n\n`Ejemplo`: .ig https://www.instagram.com/reel/C8Z0mgHuD4d/?igsh=bzE0bGo0eHRxd2dx')
-if (!text.includes('instagram')) return m.reply('Enlace no válido. Compruebe el enlace')
-m.reply(mess.wait)
-try {
-const apiUrl = `${apis}/download/instagram?url=${text}`;
-const apiResponse = await fetch(apiUrl);
-const delius = await apiResponse.json();
-if (!delius || !delius.data || delius.data.length === 0) return m.react("❌");
-const downloadUrl = delius.data[0].url;
-const fileType = delius.data[0].type;
-const caption = `Instagram 🍃`
-if (!downloadUrl) return m.react("❌");
-
-if (fileType === 'image') {
-await client.sendMessage(m.chat, { image: { url: downloadUrl }, mimetype: 'video/mp4', fileName: `video.mp4`, caption: caption, mentions: [m.sender], }, { quoted: m })
-} else if (fileType === 'video') {
-await client.sendMessage(m.chat, { video: { url: downloadUrl }, mimetype: 'video/mp4', fileName: `video.mp4`, caption: caption, mentions: [m.sender], }, { quoted: m })
-} else {
-return m.reply("error")
-}} catch (e) {
-m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
-}
+        m.reply(JSON.stringify(await ig(text), null, 2))
+        
+    } catch (e) {
+        m.reply('Ha ocurrido un error al descargar su solicitud: ' + e)
+    }
 }
 break
 

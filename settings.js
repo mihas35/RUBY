@@ -48,6 +48,9 @@ ch11: '120363370415738881@newsletter',
 ch12: '120363385983031660@newsletter',
 }
 
+global.atob = (str) => Buffer.from(str, 'base64').toString('utf-8')
+global.btoa = (str) => Buffer.from(str, 'utf-8').toString('base64')
+
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
 fs.unwatchFile(file)
