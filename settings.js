@@ -46,6 +46,8 @@ ch9: '120363167110224268@newsletter',
 ch10: '120363323882134704@newsletter',
 ch11: '120363370415738881@newsletter',
 ch12: '120363385983031660@newsletter',
+ch13: '120363343811229130@newsletter',
+ch14: '120363305941657414@newsletter',
 }
 
 global.atob = (str) => Buffer.from(str, 'base64').toString('utf-8')
