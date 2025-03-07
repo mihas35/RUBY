@@ -28,6 +28,7 @@
     "formdata-node": "^4.3.2",
     "fs": "^0.0.1-security",
     "google-it": "^1.6.3",
+    "sqlite3": "^5.1.7",
     "gradient-string": "^2.0.2",
     "human-readable": "^0.2.1",
     "imagemaker.js": "^2.0.4",
