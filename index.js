@@ -122,29 +122,24 @@ console.log(err)
 }
 })
   
-//batabase  
-global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
+//BaseDeDatos con SQLite
+  global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
+  const sqlite3 = require('sqlite3').verbose();
+  const databasePath = path.join(__dirname, 'database');
+  if (!fs.existsSync(databasePath)) fs.mkdirSync(databasePath);
+  const dbPath = path.join(databasePath, 'bot.db');
+  const db = new sqlite3.Database(dbPath);
 
-(async () => {
-const { Low, JSONFile } = await import('lowdb');
-
-const databasePath = path.join(__dirname, 'database');
-if (!fs.existsSync(databasePath)) fs.mkdirSync(databasePath);
-
-const usersPath = path.join(databasePath, 'users');
-const chatsPath = path.join(databasePath, 'chats');
-const settingsPath = path.join(databasePath, 'settings');
-const msgsPath = path.join(databasePath, 'msgs');
-const stickerPath = path.join(databasePath, 'sticker');
-const statsPath = path.join(databasePath, 'stats');
-
-[usersPath, chatsPath, settingsPath, msgsPath, stickerPath, statsPath].forEach((dir) => {
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+  // Crear tablas
+  db.serialize(() => {
+    db.run("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, data TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS chats (id TEXT PRIMARY KEY, data TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS settings (id TEXT PRIMARY KEY, data TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS msgs (id TEXT PRIMARY KEY, data TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS sticker (id TEXT PRIMARY KEY, data TEXT)");
+    db.run("CREATE TABLE IF NOT EXISTS stats (id TEXT PRIMARY KEY, data TEXT)");
+    console.log('Tablas SQLite inicializadas');
   });
-
-  function getFilePath(basePath, id) {
-    return path.join(basePath, `${id}.json`);
-  }
 
   global.db = {
     data: {
@@ -155,116 +150,108 @@ const statsPath = path.join(databasePath, 'stats');
       sticker: {},
       stats: {},
     },
-    chain: null,
   };
 
-  global.loadDatabase = async function loadDatabase() {
-const userFiles = fs.readdirSync(usersPath);
-    for (const file of userFiles) {
-      const userId = path.basename(file, '.json');
-      const userDb = new Low(new JSONFile(getFilePath(usersPath, userId)));
-      await userDb.read();
-      userDb.data = userDb.data || {};
-      global.db.data.users[userId] = userDb.data;
-    }
-    
-    const chatFiles = fs.readdirSync(chatsPath);
-    for (const file of chatFiles) {
-      const chatId = path.basename(file, '.json');
-      const chatDb = new Low(new JSONFile(getFilePath(chatsPath, chatId)));
-      await chatDb.read();
-      chatDb.data = chatDb.data || {};
-      global.db.data.chats[chatId] = chatDb.data;
-    }
+  // Leer datos desde SQLite
+  async function readFromSQLite(category, id) {
+    return new Promise((resolve, reject) => {
+      db.get(`SELECT data FROM ${category} WHERE id = ?`, [id], (err, row) => {
+        if (err) reject(err);
+        resolve(row ? JSON.parse(row.data) : {});
+      });
+    });
+  }
 
-    const settingsFiles = fs.readdirSync(settingsPath);
-    for (const file of settingsFiles) {
-      const settingId = path.basename(file, '.json');
-      const settingDb = new Low(new JSONFile(getFilePath(settingsPath, settingId)));
-      await settingDb.read();
-      settingDb.data = settingDb.data || {};
-      global.db.data.settings[settingId] = settingDb.data;
-    }
+  // Escribir datos a SQLite
+  async function writeToSQLite(category, id, data) {
+    const serializedData = JSON.stringify(data);
+    return new Promise((resolve, reject) => {
+      db.run(
+        `INSERT OR REPLACE INTO ${category} (id, data) VALUES (?, ?)`,
+        [id, serializedData],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
 
-    const msgsFiles = fs.readdirSync(msgsPath);
-    for (const file of msgsFiles) {
-      const msgId = path.basename(file, '.json');
-      const msgDb = new Low(new JSONFile(getFilePath(msgsPath, msgId)));
-      await msgDb.read();
-      msgDb.data = msgDb.data || {};
-      global.db.data.msgs[msgId] = msgDb.data;
+  // Cargar datos al iniciar
+  global.db.loadDatabase = async function () {
+    const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
+    for (const category of categories) {
+      await new Promise((resolve, reject) => {
+        db.all(`SELECT id, data FROM ${category}`, [], (err, rows) => {
+          if (err) reject(err);
+          rows.forEach(row => {
+            global.db.data[category][row.id] = JSON.parse(row.data);
+          });
+          resolve();
+        });
+      });
     }
-
-    const stickerFiles = fs.readdirSync(stickerPath);
-    for (const file of stickerFiles) {
-      const stickerId = path.basename(file, '.json');
-      const stickerDb = new Low(new JSONFile(getFilePath(stickerPath, stickerId)));
-      await stickerDb.read();
-      stickerDb.data = stickerDb.data || {};
-      global.db.data.sticker[stickerId] = stickerDb.data;
-    }
-
-    const statsFiles = fs.readdirSync(statsPath);
-    for (const file of statsFiles) {
-      const statId = path.basename(file, '.json');
-      const statDb = new Low(new JSONFile(getFilePath(statsPath, statId)));
-      await statDb.read();
-      statDb.data = statDb.data || {};
-      global.db.data.stats[statId] = statDb.data;
-    }
+    console.log('Base de datos SQLite cargada en memoria');
   };
 
-  global.db.save = async function saveDatabase() {
-    // Guardar usuarios
-    for (const [userId, userData] of Object.entries(global.db.data.users)) {
-      const userDb = new Low(new JSONFile(getFilePath(usersPath, userId)));
-      userDb.data = userData;
-      await userDb.write();
+  // Guardar datos periódicamente
+  global.db.save = async function () {
+    const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
+    for (const category of categories) {
+      for (const [id, data] of Object.entries(global.db.data[category])) {
+        if (Object.keys(data).length > 0) {
+          await writeToSQLite(category, id, data);
+        }
+      }
     }
-
-    // Guardar chats
-    for (const [chatId, chatData] of Object.entries(global.db.data.chats)) {
-      const chatDb = new Low(new JSONFile(getFilePath(chatsPath, chatId)));
-      chatDb.data = chatData;
-      await chatDb.write();
-    }
-
-    // Guardar settings
-    for (const [settingId, settingData] of Object.entries(global.db.data.settings)) {
-      const settingDb = new Low(new JSONFile(getFilePath(settingsPath, settingId)));
-      settingDb.data = settingData;
-      await settingDb.write();
-    }
-
-    // Guardar msgs
-    for (const [msgId, msgData] of Object.entries(global.db.data.msgs)) {
-      const msgDb = new Low(new JSONFile(getFilePath(msgsPath, msgId)));
-      msgDb.data = msgData;
-      await msgDb.write();
-    }
-
-    // Guardar sticker
-    for (const [stickerId, stickerData] of Object.entries(global.db.data.sticker)) {
-      const stickerDb = new Low(new JSONFile(getFilePath(stickerPath, stickerId)));
-      stickerDb.data = stickerData;
-      await stickerDb.write();
-    }
-
-    // Guardar stats
-    for (const [statId, statData] of Object.entries(global.db.data.stats)) {
-      const statDb = new Low(new JSONFile(getFilePath(statsPath, statId)));
-      statDb.data = statData;
-      await statDb.write();
-    }
+    console.log("Datos guardados en SQLite exitosamente.");
   };
 
-await loadDatabase();
+  global.db.data = new Proxy(global.db.data, {
+    get: async (target, category) => {
+      if (!target[category]) return undefined;
+      return new Proxy(target[category], {
+        get: async (target, id) => {
+          if (!target[id]) {
+            target[id] = await readFromSQLite(category, id);
+          }
+          return target[id];
+        },
+        set: (target, id, value) => {
+          target[id] = value;
+          writeToSQLite(category, id, value).catch(err => console.error(`Error escribiendo ${category}/${id}:`, err));
+          return true;
+        },
+      });
+    },
+  });
 
-setInterval(async () => {
+  // Cargar base de datos al iniciar
+  global.db.loadDatabase().then(() => {
+    console.log('Base de datos lista');
+  }).catch(err => console.error('Error cargando base de datos:', err));
+
+  // Guardar cada 30 segundos
+  setInterval(async () => {
     await global.db.save();
     console.log("Datos guardados en la base de datos exitosamente.");
   }, 30000);
-})();
+
+  // Cerrar SQLite al apagar
+  process.on('SIGINT', async () => {
+    await global.db.save();
+    db.close(() => {
+      console.log('Base de datos SQLite cerrada');
+      process.exit(0);
+    });
+  });
+  process.on('SIGTERM', async () => {
+    await global.db.save();
+    db.close(() => {
+      console.log('Base de datos SQLite cerrada');
+      process.exit(0);
+    });
+  });
 
   
 /*var low
