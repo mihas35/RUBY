@@ -116,6 +116,11 @@ self: false,
 autobio: true
 } 
 
+if (!client.user || !client.user.jid) {
+  console.log('Error: client.user.jid no está definido. Esperando conexión...');
+  return; 
+}
+
 //console
 if (m.message) {
 const fecha = chalk.bold.magentaBright(`\nFecha: ${chalk.whiteBright(moment().format('DD/MM/YY HH:mm:ss'))}`)

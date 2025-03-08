@@ -141,6 +141,7 @@ db.serialize(() => {
   console.log('Tablas SQLite inicializadas');
 });
 
+// Inicializar global.db.data con valores predeterminados
 global.db = {
   data: {
     users: {},
@@ -191,6 +192,16 @@ global.db.loadDatabase = async function () {
       });
     });
   }
+  // Asegurar valores predeterminados si la base de datos está vacía
+  if (!global.db.data.settings[client?.user?.jid]) {
+    global.db.data.settings[client?.user?.jid] = {
+      status: 0,
+      self: false,
+      autobio: true,
+    };
+    // Guardar los valores predeterminados en SQLite
+    await writeToSQLite('settings', client?.user?.jid, global.db.data.settings[client?.user?.jid]);
+  }
   console.log('Base de datos SQLite cargada en memoria');
 };
 
@@ -207,6 +218,7 @@ global.db.save = async function () {
   console.log("Datos guardados en SQLite exitosamente.");
 };
 
+// Usar Proxy para mantener compatibilidad
 global.db.data = new Proxy(global.db.data, {
   get: async (target, category) => {
     if (!target[category]) return undefined;
@@ -226,34 +238,6 @@ global.db.data = new Proxy(global.db.data, {
   },
 });
 
-// Asegurar que la base de datos esté cargada antes de continuar
-await global.db.loadDatabase().then(() => {
-  console.log('Base de datos lista');
-}).catch(err => console.error('Error cargando base de datos:', err));
-
-// Guardar cada 30 segundos
-setInterval(async () => {
-  await global.db.save();
-  console.log("Datos guardados en la base de datos exitosamente.");
-}, 30000);
-
-// Cerrar SQLite al apagar
-process.on('SIGINT', async () => {
-  await global.db.save();
-  db.close(() => {
-    console.log('Base de datos SQLite cerrada');
-    process.exit(0);
-  });
-});
-process.on('SIGTERM', async () => {
-  await global.db.save();
-  db.close(() => {
-    console.log('Base de datos SQLite cerrada');
-    process.exit(0);
-  });
-});
-
-  
 /*var low
 try {
 low = require('lowdb')
@@ -426,14 +410,40 @@ console.log(chalk.yellow(`Primer inicio de sesión exitoso`))
 }
 
 if (connection == 'open') {
-console.log(color('Fecha', '#009FFF'),
-color(moment().format('DD/MM/YY HH:mm:ss'), '#A1FFCE'),
-color(`\n☁️ Conectado correctamente al WhatsApp.\n`, '#7fff00')
-)
-console.log(receivedPendingNotifications)
-await joinChannels(client)
-}
-})
+    console.log(color('Fecha', '#009FFF'),
+      color(moment().format('DD/MM/YY HH:mm:ss'), '#A1FFCE'),
+      color(`\n☁️ Conectado correctamente al WhatsApp.\n`, '#7fff00')
+    );
+    console.log(receivedPendingNotifications);
+
+await global.db.loadDatabase().then(() => {
+      console.log('Base de datos lista');
+    }).catch(err => console.error('Error cargando base de datos:', err));
+    await joinChannels(client);
+  }
+});
+
+// Guardar cada 30 segundos
+setInterval(async () => {
+  await global.db.save();
+  console.log("Datos guardados en la base de datos exitosamente.");
+}, 30000);
+
+// Cerrar SQLite al apagar
+process.on('SIGINT', async () => {
+  await global.db.save();
+  db.close(() => {
+    console.log('Base de datos SQLite cerrada');
+    process.exit(0);
+  });
+});
+process.on('SIGTERM', async () => {
+  await global.db.save();
+  db.close(() => {
+    console.log('Base de datos SQLite cerrada');
+    process.exit(0);
+  });
+});
 
 client.public = true
 store.bind(client.ev)
