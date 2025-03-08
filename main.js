@@ -132,7 +132,7 @@ console.log(`${fecha}${mensaje}${usuario}${remitente}${grupo}`)
 }
 
 //--------------------[ AUTOBIO ]----------------------- 
-if (global.db.data.settings[client.user.jid].autobio) {
+/*if (global.db.data.settings[client.user.jid].autobio) {
 let setting = global.db.data.settings[client.user.jid]
 if (new Date() * 1 - setting.status > 1000) {
 let uptime = await runtime(process.uptime())
@@ -144,7 +144,7 @@ await client.updateProfileStatus(bio)
 setting.status = new Date() * 1 
 } catch {
 console.log(latensi.toFixed(4)) 
-}}} 
+}}} */
 
 //interactive button
 if (m.mtype === 'interactiveResponseMessage') {   
