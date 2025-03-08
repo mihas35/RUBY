@@ -105,13 +105,11 @@ detect: true,
 mute: false
 }
 let setting = global.db.data.settings[client.user.jid] || {};
-if (typeof setting !== 'object' || setting === null) {
-  setting = {};
-  global.db.data.settings[client.user.jid] = setting;
-}
-if (!isNumber(setting.status)) setting.status = 0;
+if (typeof setting !== 'object') global.db.data.settings[client.user.jid] = {}  
+if (setting) {  
+if (!isNumber(setting.status)) setting.status = 0  
 if (!('self' in setting)) setting.self = false;
-if (!('autobio' in setting)) setting.autobio = true;
+if (!('autobio' in setting)) setting.autobio = true
 } else global.db.data.settings[client.user.jid] = {  
 status: 0,  
 self: false,
