@@ -122,136 +122,136 @@ console.log(err)
 }
 })
   
-//BaseDeDatos con SQLite
-  global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
-  const sqlite3 = require('sqlite3').verbose();
-  const databasePath = path.join(__dirname, 'database');
-  if (!fs.existsSync(databasePath)) fs.mkdirSync(databasePath);
-  const dbPath = path.join(databasePath, 'bot.db');
-  const db = new sqlite3.Database(dbPath);
+// Base de datos con SQLite
+global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
+const sqlite3 = require('sqlite3').verbose();
+const databasePath = path.join(__dirname, 'database');
+if (!fs.existsSync(databasePath)) fs.mkdirSync(databasePath);
+const dbPath = path.join(databasePath, 'bot.db');
+const db = new sqlite3.Database(dbPath);
 
-  // Crear tablas
-  db.serialize(() => {
-    db.run("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, data TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS chats (id TEXT PRIMARY KEY, data TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS settings (id TEXT PRIMARY KEY, data TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS msgs (id TEXT PRIMARY KEY, data TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS sticker (id TEXT PRIMARY KEY, data TEXT)");
-    db.run("CREATE TABLE IF NOT EXISTS stats (id TEXT PRIMARY KEY, data TEXT)");
-    console.log('Tablas SQLite inicializadas');
+// Crear tablas
+db.serialize(() => {
+  db.run("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, data TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS chats (id TEXT PRIMARY KEY, data TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS settings (id TEXT PRIMARY KEY, data TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS msgs (id TEXT PRIMARY KEY, data TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS sticker (id TEXT PRIMARY KEY, data TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS stats (id TEXT PRIMARY KEY, data TEXT)");
+  console.log('Tablas SQLite inicializadas');
+});
+
+global.db = {
+  data: {
+    users: {},
+    chats: {},
+    settings: {},
+    msgs: {},
+    sticker: {},
+    stats: {},
+  },
+};
+
+// Leer datos desde SQLite
+async function readFromSQLite(category, id) {
+  return new Promise((resolve, reject) => {
+    db.get(`SELECT data FROM ${category} WHERE id = ?`, [id], (err, row) => {
+      if (err) reject(err);
+      resolve(row ? JSON.parse(row.data) : {});
+    });
   });
+}
 
-  global.db = {
-    data: {
-      users: {},
-      chats: {},
-      settings: {},
-      msgs: {},
-      sticker: {},
-      stats: {},
-    },
-  };
-
-  // Leer datos desde SQLite
-  async function readFromSQLite(category, id) {
-    return new Promise((resolve, reject) => {
-      db.get(`SELECT data FROM ${category} WHERE id = ?`, [id], (err, row) => {
+// Escribir datos a SQLite
+async function writeToSQLite(category, id, data) {
+  const serializedData = JSON.stringify(data);
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT OR REPLACE INTO ${category} (id, data) VALUES (?, ?)`,
+      [id, serializedData],
+      (err) => {
         if (err) reject(err);
-        resolve(row ? JSON.parse(row.data) : {});
-      });
-    });
-  }
+        else resolve();
+      }
+    );
+  });
+}
 
-  // Escribir datos a SQLite
-  async function writeToSQLite(category, id, data) {
-    const serializedData = JSON.stringify(data);
-    return new Promise((resolve, reject) => {
-      db.run(
-        `INSERT OR REPLACE INTO ${category} (id, data) VALUES (?, ?)`,
-        [id, serializedData],
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
-  }
-
-  // Cargar datos al iniciar
-  global.db.loadDatabase = async function () {
-    const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
-    for (const category of categories) {
-      await new Promise((resolve, reject) => {
-        db.all(`SELECT id, data FROM ${category}`, [], (err, rows) => {
-          if (err) reject(err);
-          rows.forEach(row => {
-            global.db.data[category][row.id] = JSON.parse(row.data);
-          });
-          resolve();
+// Cargar datos al iniciar
+global.db.loadDatabase = async function () {
+  const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
+  for (const category of categories) {
+    await new Promise((resolve, reject) => {
+      db.all(`SELECT id, data FROM ${category}`, [], (err, rows) => {
+        if (err) reject(err);
+        rows.forEach(row => {
+          global.db.data[category][row.id] = JSON.parse(row.data);
         });
+        resolve();
       });
-    }
-    console.log('Base de datos SQLite cargada en memoria');
-  };
+    });
+  }
+  console.log('Base de datos SQLite cargada en memoria');
+};
 
-  // Guardar datos periódicamente
-  global.db.save = async function () {
-    const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
-    for (const category of categories) {
-      for (const [id, data] of Object.entries(global.db.data[category])) {
-        if (Object.keys(data).length > 0) {
-          await writeToSQLite(category, id, data);
-        }
+// Guardar datos periódicamente
+global.db.save = async function () {
+  const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
+  for (const category of categories) {
+    for (const [id, data] of Object.entries(global.db.data[category])) {
+      if (Object.keys(data).length > 0) {
+        await writeToSQLite(category, id, data);
       }
     }
-    console.log("Datos guardados en SQLite exitosamente.");
-  };
+  }
+  console.log("Datos guardados en SQLite exitosamente.");
+};
 
-  global.db.data = new Proxy(global.db.data, {
-    get: async (target, category) => {
-      if (!target[category]) return undefined;
-      return new Proxy(target[category], {
-        get: async (target, id) => {
-          if (!target[id]) {
-            target[id] = await readFromSQLite(category, id);
-          }
-          return target[id];
-        },
-        set: (target, id, value) => {
-          target[id] = value;
-          writeToSQLite(category, id, value).catch(err => console.error(`Error escribiendo ${category}/${id}:`, err));
-          return true;
-        },
-      });
-    },
-  });
-
-  // Cargar base de datos al iniciar
-  global.db.loadDatabase().then(() => {
-    console.log('Base de datos lista');
-  }).catch(err => console.error('Error cargando base de datos:', err));
-
-  // Guardar cada 30 segundos
-  setInterval(async () => {
-    await global.db.save();
-    console.log("Datos guardados en la base de datos exitosamente.");
-  }, 30000);
-
-  // Cerrar SQLite al apagar
-  process.on('SIGINT', async () => {
-    await global.db.save();
-    db.close(() => {
-      console.log('Base de datos SQLite cerrada');
-      process.exit(0);
+global.db.data = new Proxy(global.db.data, {
+  get: async (target, category) => {
+    if (!target[category]) return undefined;
+    return new Proxy(target[category], {
+      get: async (target, id) => {
+        if (!target[id]) {
+          target[id] = await readFromSQLite(category, id);
+        }
+        return target[id];
+      },
+      set: (target, id, value) => {
+        target[id] = value;
+        writeToSQLite(category, id, value).catch(err => console.error(`Error escribiendo ${category}/${id}:`, err));
+        return true;
+      },
     });
+  },
+});
+
+// Asegurar que la base de datos esté cargada antes de continuar
+await global.db.loadDatabase().then(() => {
+  console.log('Base de datos lista');
+}).catch(err => console.error('Error cargando base de datos:', err));
+
+// Guardar cada 30 segundos
+setInterval(async () => {
+  await global.db.save();
+  console.log("Datos guardados en la base de datos exitosamente.");
+}, 30000);
+
+// Cerrar SQLite al apagar
+process.on('SIGINT', async () => {
+  await global.db.save();
+  db.close(() => {
+    console.log('Base de datos SQLite cerrada');
+    process.exit(0);
   });
-  process.on('SIGTERM', async () => {
-    await global.db.save();
-    db.close(() => {
-      console.log('Base de datos SQLite cerrada');
-      process.exit(0);
-    });
+});
+process.on('SIGTERM', async () => {
+  await global.db.save();
+  db.close(() => {
+    console.log('Base de datos SQLite cerrada');
+    process.exit(0);
   });
+});
 
   
 /*var low
