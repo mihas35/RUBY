@@ -125,8 +125,6 @@ console.log(err)
   
 // Base de datos con SQLite
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
-
-// Ruta del archivo de la base de datos
 const dbPath = path.join(__dirname, 'database');
 if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath);
 
@@ -226,12 +224,11 @@ global.db.loadDatabase().then(() => {
   console.error('Error cargando base de datos:', err);
 });
 
-// Guardar cada 30 segundos
 setInterval(async () => {
   await global.db.save();
 }, 30000);
 
-// Guardar datos al cerrar la aplicación
+// Guardar datos antes de apagarse
 process.on('SIGINT', async () => {
   await global.db.save();
   console.log('Base de datos guardada antes de cerrar');
