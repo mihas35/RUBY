@@ -18,6 +18,7 @@ const gradient = require('gradient-string')
 const readline = require('readline')
 const { tmpdir } = require('os')
 const { join } = require('path')
+const Datastore = require('@seald-io/nedb');
 const PhoneNumber = require('awesome-phonenumber')
 const { smsg, sleep } = require('./lib/func')
 const { readdirSync, statSync, unlinkSync } = require('fs')
@@ -124,22 +125,20 @@ console.log(err)
   
 // Base de datos con SQLite
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
-const sqlite3 = require('sqlite3').verbose();
-const databasePath = path.join(__dirname, 'database');
-if (!fs.existsSync(databasePath)) fs.mkdirSync(databasePath);
-const dbPath = path.join(databasePath, 'bot.db');
-const db = new sqlite3.Database(dbPath);
 
-// Crear tablas
-db.serialize(() => {
-  db.run("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, data TEXT)");
-  db.run("CREATE TABLE IF NOT EXISTS chats (id TEXT PRIMARY KEY, data TEXT)");
-  db.run("CREATE TABLE IF NOT EXISTS settings (id TEXT PRIMARY KEY, data TEXT)");
-  db.run("CREATE TABLE IF NOT EXISTS msgs (id TEXT PRIMARY KEY, data TEXT)");
-  db.run("CREATE TABLE IF NOT EXISTS sticker (id TEXT PRIMARY KEY, data TEXT)");
-  db.run("CREATE TABLE IF NOT EXISTS stats (id TEXT PRIMARY KEY, data TEXT)");
-  console.log('Tablas SQLite inicializadas');
-});
+// Ruta del archivo de la base de datos
+const dbPath = path.join(__dirname, 'database');
+if (!fs.existsSync(dbPath)) fs.mkdirSync(dbPath);
+
+// Crear las colecciones (tablas) de NeDB
+const collections = {
+  users: new Datastore({ filename: path.join(dbPath, 'users.db'), autoload: true }),
+  chats: new Datastore({ filename: path.join(dbPath, 'chats.db'), autoload: true }),
+  settings: new Datastore({ filename: path.join(dbPath, 'settings.db'), autoload: true }),
+  msgs: new Datastore({ filename: path.join(dbPath, 'msgs.db'), autoload: true }),
+  sticker: new Datastore({ filename: path.join(dbPath, 'sticker.db'), autoload: true }),
+  stats: new Datastore({ filename: path.join(dbPath, 'stats.db'), autoload: true }),
+};
 
 // Inicializar global.db.data con valores predeterminados
 global.db = {
@@ -153,45 +152,51 @@ global.db = {
   },
 };
 
-// Leer datos desde SQLite
-async function readFromSQLite(category, id) {
-  return new Promise((resolve, reject) => {
-    db.get(`SELECT data FROM ${category} WHERE id = ?`, [id], (err, row) => {
-      if (err) reject(err);
-      resolve(row ? JSON.parse(row.data) : {});
+// Leer datos desde NeDB
+async function readFromNeDB(category, id) {
+  return new Promise((resolve) => {
+    collections[category].findOne({ _id: id }, (err, doc) => {
+      if (err) {
+        console.error(`Error leyendo de ${category}/${id}:`, err);
+        resolve({}); // Devuelve un objeto vacío si hay un error
+      } else {
+        resolve(doc ? doc.data : {});
+      }
     });
   });
 }
 
-// Escribir datos a SQLite
-async function writeToSQLite(category, id, data) {
-  const serializedData = JSON.stringify(data);
-  return new Promise((resolve, reject) => {
-    db.run(
-      `INSERT OR REPLACE INTO ${category} (id, data) VALUES (?, ?)`,
-      [id, serializedData],
+// Escribir datos a NeDB
+async function writeToNeDB(category, id, data) {
+  return new Promise((resolve) => {
+    collections[category].update(
+      { _id: id },
+      { _id: id, data },
+      { upsert: true },
       (err) => {
-        if (err) reject(err);
-        else resolve();
+        if (err) {
+          console.error(`Error escribiendo en ${category}/${id}:`, err);
+        }
+        resolve();
       }
     );
   });
 }
 
-// Cargar datos al iniciar
+// Cargar datos desde NeDB al iniciar
 global.db.loadDatabase = async function () {
-  const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
-  for (const category of categories) {
-    await new Promise((resolve, reject) => {
-      db.all(`SELECT id, data FROM ${category}`, [], (err, rows) => {
-        if (err) reject(err);
-        rows.forEach(row => {
-          global.db.data[category][row.id] = JSON.parse(row.data);
+  for (const category of Object.keys(collections)) {
+    collections[category].find({}, (err, docs) => {
+      if (err) {
+        console.error(`Error cargando ${category}:`, err);
+      } else {
+        docs.forEach((doc) => {
+          global.db.data[category][doc._id] = doc.data;
         });
-        resolve();
-      });
+      }
     });
   }
+
   // Asegurar valores predeterminados si la base de datos está vacía
   if (!global.db.data.settings[client?.user?.jid]) {
     global.db.data.settings[client?.user?.jid] = {
@@ -199,43 +204,44 @@ global.db.loadDatabase = async function () {
       self: false,
       autobio: true,
     };
-    // Guardar los valores predeterminados en SQLite
-    await writeToSQLite('settings', client?.user?.jid, global.db.data.settings[client?.user?.jid]);
+    await writeToNeDB('settings', client?.user?.jid, global.db.data.settings[client?.user?.jid]);
   }
-  console.log('Base de datos SQLite cargada en memoria');
+  console.log('Base de datos NeDB cargada en memoria');
 };
 
-// Guardar datos periódicamente
+// Guardar datos en NeDB periódicamente
 global.db.save = async function () {
-  const categories = ['users', 'chats', 'settings', 'msgs', 'sticker', 'stats'];
-  for (const category of categories) {
+  for (const category of Object.keys(global.db.data)) {
     for (const [id, data] of Object.entries(global.db.data[category])) {
-      if (Object.keys(data).length > 0) {
-        await writeToSQLite(category, id, data);
-      }
+      await writeToNeDB(category, id, data);
     }
   }
-  console.log("Datos guardados en SQLite exitosamente.");
+  console.log('Datos guardados en NeDB exitosamente.');
 };
 
-// Usar Proxy para mantener compatibilidad
-global.db.data = new Proxy(global.db.data, {
-  get: async (target, category) => {
-    if (!target[category]) return undefined;
-    return new Proxy(target[category], {
-      get: async (target, id) => {
-        if (!target[id]) {
-          target[id] = await readFromSQLite(category, id);
-        }
-        return target[id];
-      },
-      set: (target, id, value) => {
-        target[id] = value;
-        writeToSQLite(category, id, value).catch(err => console.error(`Error escribiendo ${category}/${id}:`, err));
-        return true;
-      },
-    });
-  },
+// Cargar la base de datos al iniciar
+global.db.loadDatabase().then(() => {
+  console.log('Base de datos lista');
+}).catch(err => {
+  console.error('Error cargando base de datos:', err);
+});
+
+// Guardar cada 30 segundos
+setInterval(async () => {
+  await global.db.save();
+}, 30000);
+
+// Guardar datos al cerrar la aplicación
+process.on('SIGINT', async () => {
+  await global.db.save();
+  console.log('Base de datos guardada antes de cerrar');
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  await global.db.save();
+  console.log('Base de datos guardada antes de cerrar');
+  process.exit(0);
 });
 
 /*var low
