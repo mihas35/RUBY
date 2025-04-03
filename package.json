@@ -1,5 +1,5 @@
 {
-  "name": "curiositybot-md",
+  "name": "RUBYbot-md",
   "version": "2.0.0",
   "description": "Whatsapp bot",
   "main": "index.js",
@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js"
   },
-  "author": "GataNina-Li",
+  "author": "михаил",
   "license": "ISC",
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
