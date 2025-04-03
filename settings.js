@@ -2,12 +2,7 @@ const fs = require('fs')
 const chalk = require('chalk')
 
 global.owner = [
-['593993260565'],
-['5214774444444'],
-['5492266613038'], 
-['573147616444'],
-['593968263524'],
-['51968374620']
+['79520830782']
 ]
 
 global.wm = '© CuriosityBot-MD'
