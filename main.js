@@ -51,7 +51,7 @@ const command = body.slice(prefix.length).trim().split(/\s+/)[0].toLowerCase()
 const args = body.trim().split(/\s+/).slice(1)
 const chatContent = (() => {
 const messageTypes = { 'conversation': m.message.conversation, 'imageMessage': m.message.imageMessage?.caption, 'documentMessage': m.message.documentMessage?.caption, 'videoMessage': m.message.videoMessage?.caption, 'extendedTextMessage': m.message.extendedTextMessage?.text, 'buttonsResponseMessage': m.message.buttonsResponseMessage?.selectedButtonId, 'templateButtonReplyMessage': m.message.templateButtonReplyMessage?.selectedId, 'listResponseMessage': m.message.listResponseMessage?.singleSelectReply?.selectedRowId, 'messageContextInfo': m.message.listResponseMessage?.singleSelectReply?.selectedRowId }; return messageTypes[m.mtype] || '' })()
-const pushname = m.pushName || 'Sin nombre'
+const pushname = m.pushName || 'Безымянный'
 const text = args.join(' ')
 const q = args.join(" ") 
 const quoted = m.quoted || m
@@ -118,7 +118,7 @@ autobio: true
 
 //console
 if (m.message) {
-const fecha = chalk.bold.magentaBright(`\nFecha: ${chalk.whiteBright(moment().format('DD/MM/YY HH:mm:ss'))}`)
+const fecha = chalk.bold.magentaBright(`\nFecha: ${chalk.whiteBright(moment().format('ДД/ММ/ГГЧЧ:мм:сс'))}`)
 const mensaje = chalk.bold.greenBright(`\nMensaje: ${chalk.whiteBright(msgs(m.text))}`)
 const usuario = chalk.bold.blueBright(`\nUsuario: ${chalk.yellowBright(pushname)}`)
 const remitente = chalk.bold.redBright(`\nRemitente: ${gradient('deepskyblue', 'darkorchid')(sender)}`)
@@ -159,7 +159,7 @@ return client.ev.emit('messages.upsert', { messages : [ emit ] ,  type : 'notify
 //antilink all
 if (global.db.data.chats[m.chat].antilink && groupMetadata) {
 let linksProhibidos = {
-'telegram': /telegram\.me|t\.me/gi,
+'телеграмма ': /telegram\.me|t\.me/gi,
 'facebook': /facebook\.com/gi,
 'whatsapp': /chat\.whatsapp\.com/gi,
 'youtube': /youtu\.be|youtube\.com/gi
@@ -174,15 +174,15 @@ return false
 }
 let EnlacesProhibidos = ['whatsapp', 'telegram']
 if (vl(m.text, EnlacesProhibidos)) {
-if (!isBotAdmins) return m.reply('El bot no es admin, no puede eliminar intrusos')
+if (!isBotAdmins) return m.reply('Бот не является администратором, он не может удалять злоумышленников')
 let gclink = (`https://chat.whatsapp.com/` + await client.groupInviteCode(m.chat))
 let isLinkThisGc = new RegExp(gclink, 'i')
 let isgclink = isLinkThisGc.test(m.text)
-if (isgclink) return client.sendMessage(m.chat, { text: `El enlace pertenece a *${groupName}*` }, { quoted: m })
-if (isAdmins) return client.sendMessage(m.chat, { text: 'No puedo eliminar un administrador' }, { quoted: m })
+if (isgclink) return client.sendMessage(m.chat, { text: `Ссылка принадлежит *${groupName}*` }, { quoted: m })
+if (isAdmins) return client.sendMessage(m.chat, { text: 'Я не могу удалить администратора' }, { quoted: m })
 await client.sendMessage(m.chat, { delete: { remoteJid: m.chat, fromMe: false, id: m.key.id, participant: m.key.participant } })
-client.sendMessage(from, { text: `Anti Enlaces\n\n@${m.sender.split('@')[0]} mandaste un enlace prohibido`, contextInfo: { mentionedJid: [sender] } }, { quoted: m })
-client.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
+client.sendMessage(from, { text: `Анти Ссылки\n\n@${m.sender.split('@')[0]} вы отправили запрещенную ссылку`, contextInfo: { mentionedJid: [sender] } }, { quoted: m })
+client.groupParticipantsUpdate(m.chat, [m.sender], 'удалить')
 }
 }
 
@@ -191,8 +191,8 @@ if (global.db.data.chats[m.chat].antifake && !isAdmins) {
 let forbidPrefixes = ['965', '966', '971', '974', '212', '213', '216', '44', '1', '62', '61', '64', '353', '33', '32', '41', '352', '377', '351', '244', '258', '91', '977', '880', '92', '94', '960', '7', '380', '375', '998', '996', '373', '374', '994', '992', '62', '49', '43', '39', '378', '379', '86', '886', '852', '853', '65', '850', '82', '93', '98', '48', '84', '856', '855', '254', '255', '256', '250', '257', '258', '252', '269', '243', '90', '998', '60', '222', '27', '265']
 for (let prefix of forbidPrefixes) {
 if (m.sender.startsWith(prefix)) {
-await m.reply('*Anti Fakes* activo')
-client.groupParticipantsUpdate(m.chat, [m.sender], 'remove')}}}
+await m.reply('*Aнти-фейк* активный')
+client.groupParticipantsUpdate(m.chat, [m.sender], 'удалить')}}}
   
 switch (prefix && command) {
 
@@ -214,7 +214,7 @@ const defaultLang = 'es'
 if ((args[0] || '').length !== 2) {
 lang = defaultLang
 text = args.join(' ')
-m.reply('Se ha detectado que no has ingresado un *código* de *idioma* válido. Se usará el idioma predeterminado (Español).')
+m.reply('Было обнаружено, что вы не ввели действительный *код* языка*. Будет использоваться язык по умолчанию (испанский).')
 }
 
 if (!text && m.quoted && m.quoted.text) text = m.quoted.text
@@ -229,7 +229,7 @@ const loll = await lol.json()
 const result2 = loll.result.translated
 await m.reply(`${result2}`)
 } catch (e) {
-await m.reply('No se pudo realizar la traducción: ' + e)
+await m.reply('Не удалось выполнить перевод: ' + e)
 }}}
 break
 
@@ -243,20 +243,20 @@ let q = m.quoted ? m.quoted : m
 let mime = (q.msg || q).mimetype || q.mediaType || ''
 
 if (!mime) {
-return m.reply(`Responde a una *imagen* usando este mismo *comando* (${prefix + command})`)
+return m.reply(`Ответить на *изображение* с помощью этой же * команды* (${prefix + command})`)
 }
 
 if (!/image\/(jpe?g|png)/.test(mime)) {
-return m.reply(`Tipo de *media* no válida`)
+return m.reply(`Недопустимый тип * носителя* `)
 }
 
-m.reply('`Cargando Imágen`') 
+m.reply('`Загрузка Изображений`') 
 try {
 let img = await q.download?.()
-let pr = await remini(img, 'enhance')
-client.sendMessage(m.chat, { image: pr, caption: `Calidad mejorada` }, { quoted: m, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100 })
+let pr = await remini(img, 'усилить')
+client.sendMessage(m.chat, { image: pr, caption: `Улучшенное качество` }, { quoted: m, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100 })
 } catch (e) {
-return m.reply('Ha ocurrido un error al intentar mejorar la calidad de la imagen: ' + e) 
+return m.reply('Произошла ошибка при попытке улучшить качество изображения:' + e) 
 }
 }
 break
@@ -269,15 +269,15 @@ let gpt = await fetch(`${apis}/ia/gptweb?text=${text}`)
 let res = await gpt.json()
 await await m.reply(res.data)
 } catch (e) {
-return m.reply('Ha ocurrido un error al solicitar su petición: ' + e)
+return m.reply('Произошла ошибка при подаче вашего запроса: ' + e)
 }}
 break
 
 case "deepseek": case "ia3": {
-if (!text) return m.reply(`Ingrese lo que *desea* preguntar a *DeepSeek-AI*\n\n\`Ejemplo\`: ${prefix + command} ¿Qué es la teología?`)
+if (!text) return m.reply(`Напишите, что * вы * хотите * спросить * Глубокий взгляд на Кая*\n\n\`Пример\`: ${prefix + command}Что такое теология?`)
 client.sendPresenceUpdate('composing', from)
 let { data } = await axios.get(`https://archive-ui.tanakadomp.biz.id/ai/deepseek?text=${text}`)
-await m.reply(data?.result || '❌ No se obtuvo una respuesta válida de DeepSeek AI.')
+await m.reply(data?.result || '❌Достоверного ответа от DeepSeek AI получено не было.')
 }
 break
 
@@ -329,10 +329,10 @@ m.reply('Ha ocurrido un error al realizar la búsqueda: ' + e)
 }}}
 break
 
-case 'yts':
+case 'ютуб':
 case 'ytsearch': {
 if (!text) {
-return m.reply('Ingrese el *título* de un *vídeo*\n\n`Ejemplo`: .yts CuriosityBot-MD')
+return m.reply('Введите *название* * видео*\n\n`Пример`: .ютуб Любопытство обоих-MD')
 }
 
 let ress = await yts(`${text}`)
@@ -340,112 +340,88 @@ let armar = ress.all
 const Ibuff = await getBuffer(armar[0].image)
 let teks2 = armar.map(v => {
 switch (v.type) {
-case 'video': return `
-Título: *${v.title}* 
-Duración: ${v.timestamp}
-Subido: ${v.ago}
-Vistas: ${v.views}
+case 'видео': return `
+Заголовок: *${v.title}* 
+Продолжительность: ${v.timestamp}
+Повышенный: ${v.ago}
+Вид: ${v.views}
 Url: ${v.url}
 `.trim()
-case 'channel': return `
-Canal: *${v.name}*
+case 'канал': return `
+Канал: *${v.name}*
 Url: ${v.url}
-Subscriptores: ${v.subCountLabel} (${v.subCount})
-Videos totales: ${v.videoCount}
+Подписчики: ${v.subCountLabel} (${v.subCount})
+Всего видео: ${v.videoCount}
 `.trim()
 }
 }).filter(v => v).join('\n----------------------------------------\n')
 client.sendMessage(m.chat, { image: Ibuff, caption: teks2 }, { quoted: m })
 .catch((err) => {
-m.reply('Error')
+m.reply('Ошибка')
 })
 }
 break
 
 //info
-case 'menu':
-case 'help':
-case 'allmenu': {
-const texto = `Menu - Curiosity
+case 'меню':
+case 'помощь':
+case 'всеменю': {
+const texto = `Меню-RUBY
 
-┌  ◦ Información
-│  ◦ ${prefix}sc
-│  ◦ ${prefix}ping
-│  ◦ ${prefix}speedtest
-└  ◦ Información
+┌  ◦ Информация
+│  ◦ ${prefix}сценарий
+│  ◦ ${prefix}скорость
+└  ◦ Информация
 
-┌  ◦ On Off
-│  ◦ ${prefix}on
-│  ◦ ${prefix}off
-└  ◦ On Off
+┌  ◦ включить/выключить
+│  ◦ ${prefix}включить
+│  ◦ ${prefix}выключить
+└  ◦ включить/выключить
 
-┌  ◦ Buscadores
-│  ◦ ${prefix}google
-│  ◦ ${prefix}ia
-└  ◦ Buscadores
+┌  ◦ Разгрузки
+│  ◦ ${prefix}плей
+│  ◦ ${prefix}плей аудио
+│  ◦ ${prefix}плей видео
+└  ◦ Разгрузки
 
-┌  ◦ Herramientas
-│  ◦ ${prefix}hd
-│  ◦ ${prefix}traducir
-└  ◦ Herramientas
+┌  ◦ Группа
+│  ◦ ${prefix}админы
+│  ◦ ${prefix}группа
+│  ◦ ${prefix}понизить
+│  ◦ ${prefix}призраки
+│  ◦ ${prefix}удалить
+│  ◦ ${prefix}ссылка
+│  ◦ ${prefix}повысить
+│  ◦ ${prefix}вызов
+└  ◦ Группа
 
-┌  ◦ Descargas
-│  ◦ ${prefix}play
-│  ◦ ${prefix}play audio
-│  ◦ ${prefix}play video
-│  ◦ ${prefix}play mp3doc
-│  ◦ ${prefix}play mp4doc
-│  ◦ ${prefix}gitclone
-│  ◦ ${prefix}tiktok
-│  ◦ ${prefix}facebook
-│  ◦ ${prefix}instagram
-│  ◦ ${prefix}slider
-│  ◦ ${prefix}x
-│  ◦ ${prefix}gdrive
-└  ◦ Descargas
+┌  ◦ Стикеры
+│  ◦ ${prefix}с
+└  ◦ Стикеры
 
-┌  ◦ Grupo
-│  ◦ ${prefix}admins
-│  ◦ ${prefix}grupo
-│  ◦ ${prefix}demote
-│  ◦ ${prefix}fantasmas
-│  ◦ ${prefix}hidetag
-│  ◦ ${prefix}kick
-│  ◦ ${prefix}link
-│  ◦ ${prefix}promote
-│  ◦ ${prefix}tagall
-└  ◦ Grupo
-
-┌  ◦ Stickers
-│  ◦ ${prefix}s
-└  ◦ Stickers
-
-┌  ◦ Propietario
+┌  ◦ Владелец
 │  ◦ ${prefix}update
-│  ◦ ${prefix}restart
-│  ◦ ${prefix}join
-│  ◦ ${prefix}getcase 
-│  ◦ ${prefix}addcase 
-└  ◦ Propietario`
+│  ◦ ${prefix}соединять
+└  ◦ Владелец`
 await client.sendMessage(m.chat, {text: texto, contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterName: 'CuriosityBot', newsletterJid: "120363167110224268@newsletter", }, externalAdReply: { title: `© CuriosityBot-MD`, body: '', thumbnailUrl: 'https://qu.ax/lFTW.jpeg', sourceUrl: 'https://github.com/AzamiJs', mediaType: 1, renderLargerThumbnail: true }}}, {quoted: fkontak})
 }
 break
 
-case 'ping': {
+case 'скорость': {
 const girastamp = speed()
 const latensi = speed() - girastamp
 const _muptime = process.uptime() * 1000
 const muptime = clockString(_muptime)
-m.reply(`Tiempo de respuesta *${latensi.toFixed(4)}*\n\nTiempo de actividad *${muptime}*`)
+m.reply(`Время реагирования *${latensi.toFixed(4)}*\n\nВремя безотказной работы *${muptime}*`)
 }
 break
 
-case 'sc': case 'script': case 'git': {
+case 'sc': case 'сценарий': case 'git': {
 try {
 let res = await fetch('https://api.github.com/repos/AzamiJs/CuriosityBot-MD')
 let json = await res.json()
-let git = `*乂  Bot  -  Script*\n\n· *Nombre*: ${json.name}\n· *Visitantes*: ${json.watchers_count}\n· *Peso*: ${(json.size / 1024).toFixed(2)} MB\n· *Actualizado*: ${moment(json.updated_at).format('DD/MM/YY - HH:mm:ss')}\n· *Url* : ${json.html_url}\n\n	   ${json.forks_count} Forks · ${json.stargazers_count} Stars · ${json.open_issues_count} Issues`
-await client.sendMessage(m.chat, {text: git, contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterName: 'CuriosityBot', newsletterJid: "120363167110224268@newsletter", }, externalAdReply: { title: `© CuriosityBot-MD`, body: '', thumbnailUrl: 'https://qu.ax/lFTW.jpeg', sourceUrl: 'https://github.com/AzamiJs', mediaType: 1, renderLargerThumbnail: true }}}, {quoted: fkontak})
+let git = `*乂  Бот  -  сценарий*\n\n· *номер*: ${json.name}\n· *Посетители*: ${json.watchers_count}\n· *Вес*: ${(json.size / 1024).toFixed(2)} MB\n· *Обновленный*: ${moment(json.updated_at).format('ДД/ММ/ГГ - ЧЧ:мм:сс')}\n· *Url* : ${json.html_url}\n\n	   ${json.forks_count} Forks · ${json.stargazers_count} Stars · ${json.open_issues_count} Issues`
+await client.sendMessage(m.chat, {text: git, contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterName: 'RUBYBot', newsletterJid: "120363167110224268@newsletter", }, externalAdReply: { title: `© CuriosityBot-MD`, body: '', thumbnailUrl: 'https://qu.ax/lFTW.jpeg', sourceUrl: 'https://github.com/AzamiJs', mediaType: 1, renderLargerThumbnail: true }}}, {quoted: fkontak})
 } catch (e) {
 m.reply(e)
 }
@@ -476,8 +452,8 @@ console.log(e)}}
 break 
 
 //enable on/off
-case 'on':
-case 'off': {
+case 'включить':
+case 'выключить': {
 if (!m.isGroup) {
 return m.reply(mess.group)
 }
@@ -489,17 +465,17 @@ return m.reply(mess.admin)
 }
 
 if (!text) {
-let txt = 'Seleccione una de las siguientes *configuraciones*'
+let txt = 'Выберите одну из следующих * настроек*'
 let listSections = []    
 listSections.push({
 title: '',
 rows: [
-{ header: '', title: '🟢| Activar Antilink', id: `.on antilink`, description: `` }, 
-{ header: '', title: '🔴| Desactivar Antilink', id: `.off antilink`, description: `` },
-{ header: '', title: '🟢| Activar Antifake', id: `.on antifake`, description: `` }, 
-{ header: '', title: '🔴| Desactivar Antifake', id: `.off antifake`, description: `` },
-{ header: '', title: '🟢| Activar Welcome', id: `.on welcome`, description: `` }, 
-{ header: '', title: '🔴| Desactivar Welcome', id: `.off welcome`, description: `` }
+{ header: '', title: '🟢| Activar Antilink', id: `.включить антиссылка`, description: `` }, 
+{ header: '', title: '🔴| Desactivar Antilink', id: `.выключить антиссылка`, description: `` },
+{ header: '', title: '🟢| Activar Antifake', id: `.включить антифейк`, description: `` }, 
+{ header: '', title: '🔴| Desactivar Antifake', id: `.выключить антифейк`, description: `` },
+{ header: '', title: '🟢| Activar Welcome', id: `.включить приветствие`, description: `` }, 
+{ header: '', title: '🔴| Desactivar Welcome', id: `.выключить приветствие`, description: `` }
 ]})
 
 await client.sendList(m.chat, txt, null, `Configuraciones`, listSections, { mentions: [sender]}, { quoted: fkontak })
@@ -509,92 +485,92 @@ return
 let setting = text.trim().toLowerCase()
 
 switch (setting) {
-case 'antilink':
-if (command === 'on') {
+case 'антиссылка':
+if (command === 'включить') {
 if (db.data.chats[m.chat].antilink) {
-return m.reply('La función *Antilink* ya está *activada*')
+return m.reply('Функция * антиссылка * уже запущена *включена*')
 }
 db.data.chats[m.chat].antilink = true
-m.reply('La función *Antilink* fue *activada*')
-} else if (command === 'off') {
+m.reply('Функция *антиссылка * была*включена*')
+} else if (command === 'выключить') {
 if (!db.data.chats[m.chat].antilink) {
-return m.reply('La función *Antilink* ya está *desactivada*')
+return m.reply('функция *антиссылка* уже *выключена*')
 }
 db.data.chats[m.chat].antilink = false
-m.reply('La función *Antilink* fue *desactivada*')
+m.reply('Функция * антиссылка * была * отключена*')
 break
 }
 
-case 'antifake':
-if (command === 'on') {
+case 'антифейк':
+if (command === 'включить') {
 if (db.data.chats[m.chat].antifake) {
-return m.reply('La función *Antifake* ya está *activada*')
+return m.reply('функция *антифейк* уже *включена*')
 }
 db.data.chats[m.chat].antifake = true
-m.reply('La función *Antifake* fue *activada*')
-} else if (command === 'off') {
+m.reply('функция *антифейк* была *включена*')
+} else if (command === 'выключить') {
 if (!db.data.chats[m.chat].antifake) {
-return m.reply('La función *Antifake* ya está *desactivada*')
+return m.reply('Функция * Антифейк * уже * отключена*')
 }
 db.data.chats[m.chat].antifake = false
-m.reply('La función *Antifake* ya está *desactivada*')
+m.reply('Функция * Антифейк * уже * отключена*')
 break
 }
 
-case 'welcome':
-if (command === 'on') {
+case 'приветствие':
+if (command === 'включить') {
 if (db.data.chats[m.chat].welcome) {
-return m.reply('El *mensaje* de bienvenida ya está *activado*')
+return m.reply('Приветственное * сообщение * уже * включено*')
 }
 db.data.chats[m.chat].welcome = true
-m.reply('*Mensaje* de bienvenida *activado*')
-} else if (command === 'off') {
+m.reply('*Сообщение* Приветствие *включено*')
+} else if (command === 'выключить') {
 if (!db.data.chats[m.chat].welcome) {
-return m.reply('El *mensaje* de bienvenida ya está *desactivado*')
+return m.reply('Приветственное * сообщение * уже * отключено*')
 }
 db.data.chats[m.chat].welcome = false
-m.reply('*Mensaje* de bienvenida *desactivado*')
+m.reply('*Сообщение* Приветствие *Отключено*')
 break
 }
 
 default:
-m.reply('Elije una opción correcta: `antilink`, `antifake`, `welcome`\n\n- .on welcome\n- .off welcome')
+m.reply('Выберите правильный вариант: `антиссылка`, `антифейк`, `приветствие`\n\n- .включить приветствие\n- .выключить приветствие')
 break
 }
 }
 break
 
 //descargar
-case 'play': {
+case 'плей': {
 const fetch = require('node-fetch')
 const { ytmp3, ytmp4 } = require("@hiudyy/ytdl");
 const yts = require('yt-search');
 const { sanitizeFileName } = require('./lib/func')
-if (!text) return m.reply('*Ingrese título y tipo de media*\nEjemplo: `!play audio Those Eyes`\n\nTipos: `audio`, `video`, `mp3doc`, `mp4doc`');
+if (!text) return m.reply('*Введите заголовок и тип носителя*\nпример: ` воспроизведи звук этих глаз`\n\nСоветы: `аудио`, `видео`');
 
 const [selection, ...queryParts] = text.split(' ');
 const query = queryParts.join(' ');
-const validSelections = ['audio', 'video', 'mp3doc', 'mp4doc'];
+const validSelections = ['аудио', 'видео'];
 try {
-if (!query) return m.reply('Falta el título del vídeo');
-if (!validSelections.includes(selection.toLowerCase())) return m.reply(`Tipo inválido. Usa: ${validSelections.join(', ')}`);
+if (!query) return m.reply('Заголовок видео отсутствует');
+if (!validSelections.includes(selection.toLowerCase())) return m.reply(`Недопустимый тип. Используй: ${validSelections.join(', ')}`);
 m.reply(mess.wait);
 const search = await yts(query);
-if (!search.videos.length) return m.reply('No se encontraron resultados');
+if (!search.videos.length) return m.reply('Результатов не найдено');
 const video = search.videos[0];
 const url = video.url;
         
 const sendVideoInfo = async () => {
-const ytMsg = `*● Titulo:* ${video.title}\n\n👀 Vistas: ${video.views}\n⏳ Duración: ${video.timestamp}\n🌐 Enlace: ${url}`;
+const ytMsg = `*● Заголовок:* ${video.title}\n\n👀 Вид: ${video.views}\n⏳ Продолжительность: ${video.timestamp}\n🌐 Связь: ${url}`;
 await client.sendMessage(m.chat, { image: { url: video.thumbnail }, caption: ytMsg }, { quoted: m });
 };
 await sendVideoInfo();
 
 switch(selection.toLowerCase()) {
-case 'audio': {
+case 'аудио': {
 try {
 const audio = await ytmp3(url);
-await client.sendMessage(m.chat, {audio: audio, mimetype: 'audio/mpeg', fileName: `${sanitizeFileName(video.title)}.mp3`}, { quoted: m });
+await client.sendMessage(m.chat, {audio: audio, mimetype: 'аудио/mpeg', fileName: `${sanitizeFileName(video.title)}.mp3`}, { quoted: m });
 } catch (e) {
 try {  
 const res = await fetch(`https://api.siputzx.my.id/api/d/ytmp3?url=${url}`);
@@ -606,16 +582,16 @@ m.reply(e)
 break;
 }
             
-case 'video': {
+case 'видео': {
 try {
 const videoData = await ytmp4(url);
 await client.sendMessage(m.chat, { 
-video: { url: videoData }, mimetype: 'video/mp4',caption: video.title}, { quoted: m });
+video: { url: videoData }, mimetype: 'видео/mp4',caption: video.title}, { quoted: m });
 } catch (e) {
 try {  
 const res = await fetch(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`);
 let { data } = await res.json();
-await client.sendMessage(m.chat, { video: { url: data.dl }, fileName: `video.mp4`, mimetype: 'video/mp4', caption: video.title }, { quoted: m })
+await client.sendMessage(m.chat, { video: { url: data.dl }, fileName: `видео.mp4`, mimetype: 'видео/mp4', caption: video.title }, { quoted: m })
 } catch (e) {    
 m.reply(e)
 }}
@@ -634,7 +610,7 @@ await client.sendMessage(m.chat, {document: videoData, fileName: `${sanitizeFile
 break;
 }}} catch (e) {
 console.error('Error:', e);
-m.reply(`❌ Error al procesar: ${e.message?.split('\n')[0] || 'Revisa la consola para detalles'}` + e);
+m.reply(`❌Ошибка при обработке: ${e.message?.split('\n')[0] || 'Проверьте консоль для получения подробной информации'}` + e);
 }
 }
 break;
@@ -831,17 +807,17 @@ m.reply('Ha ocurrido un error al descargar su documento: ' + e)
 break
 
 //grupos
-case 'admins': 
+case 'админы': 
 case 'admin': {
 if (!m.isGroup) {
 return m.reply(mess.group)
 }
 
 if (!text) {
-return m.reply('Ingrese su *motivo* por el cual desea la presencia de *admins*')
+return m.reply('Введите свою *причину*, по которой вы хотите, чтобы *администраторы присутствовали*')
 }
 if (text.length < 10) {
-return m.reply('Parece un motivo corto')
+return m.reply('Похоже на короткий мотив')
 }
 
 const pp = await client.profilePictureUrl(m.chat, 'image').catch(_ => null) || 'https://qu.ax/OEgX.jpg'
@@ -850,16 +826,16 @@ const listaAdmins = groupAdmins.map((v, i) => `\`${i + 1}\` @${v.id.split('@')[0
 const owner = groupMetadata.owner || groupAdmins.find(p => p.admin === 'superadmin')?.id || m.chat.split`-`[0] + '@s.whatsapp.net'
 
 let mensaje = args.join` `
-let yo = `Mensaje: ${text}`
+let yo = `Сообщение: ${text}`
 let texto = `${yo}
 
-⚠️ Staff del grupo ⚠️
+⚠️ Персонал группы ⚠️
 ${listaAdmins}`.trim()
 client.sendMessage(m.chat, { image: { url: pp }, caption: texto, mentions: [...groupAdmins.map(v => v.id), owner]}, { quoted: m })
 }
 break
 
-case 'grupo':
+case 'группа':
 case 'group': 
 case 'settings': {
 if (!m.isGroup) {
@@ -874,16 +850,16 @@ if (!isAdmins) {
 return m.reply(mess.admin)
 }
 
-const isClose = { 'open': 'not_announcement', 'close': 'announcement', 'abierto': 'not_announcement', 'cerrado': 'announcement', 'abrir': 'not_announcement', 'cerrar': 'announcement', 'desbloquear': 'unlocked', 'bloquear': 'locked' }[(args[0] || '')]
+const isClose = { 'открыть': 'не_объявление', 'закрыть': 'объявление', 'abierto': 'not_announcement', 'cerrado': 'announcement', 'abrir': 'not_announcement', 'cerrar': 'announcement', 'desbloquear': 'unlocked', 'bloquear': 'locked' }[(args[0] || '')]
 if (isClose === undefined) { 
-return m.reply('*Seleccione una opción para configurar el grupo*\n\n`Ejemplo`:\n○ !grupo abrir\n○ !grupo cerrar\n○ !grupo bloquear\n○ !grupo desbloquear')
+return m.reply('*Выберите параметр для настройки группы*\n\n`пример`:\n○ открыть группу\n○  группа закрыть\n○ !grupo bloquear\n○ !grupo desbloquear')
 }
 await client.groupSettingUpdate(m.chat, isClose)
-{ m.reply('> Grupo configurado correctamente') }
+{ m.reply('> Группа настроена правильно') }
 }
 break
 
-case 'demote': 
+case 'понизить': 
 case 'degradar': 
 case 'quitaradmin': {
 if (!m.isGroup) {
@@ -905,10 +881,10 @@ var number = text.split`@`[1]
 var number = text
 }
 if (!text && !m.quoted) {
-return m.reply('Etiquete al *administrador* que desea *degradar*')
+return m.reply('Отметьте *администратора*, которого вы хотите *понизить в должности*')
 }
 if (number.length > 13 || (number.length < 11 && number.length > 0)) {
-return m.reply('Número proporcionado incorrecto')
+return m.reply('Неверный указанный номер')
 }
 try {
 if (text) {
@@ -920,13 +896,13 @@ var User = number + '@s.whatsapp.net'
 } 
 } catch (e) {
 } finally {
-client.groupParticipantsUpdate(m.chat, [User], 'demote')
-m.reply('> Degradado con éxito')
+client.groupParticipantsUpdate(m.chat, [User], 'понизить')
+m.reply('>Успешно понижен в должности')
 }
 }
 break
 
-case 'fantasmas': {
+case 'призраки': {
 const { areJidsSameUser } = require('@whiskeysockets/baileys')
 
 if (!m.isGroup) {
@@ -956,9 +932,9 @@ total++
 sider.push(member[i])}}}
 
 if (total == 0) {
-return m.reply('Este grupo es activo')
+return m.reply('Эта группа активна')
 }
-client.sendMessage(m.chat, { text: `Lista de inactivos\n${sider.map(v => '· @' + v.replace(/@.+/, '')).join('\n')}`, mentions: sider }) 
+client.sendMessage(m.chat, { text: `Список неактивных\n${sider.map(v => '· @' + v.replace(/@.+/, '')).join('\n')}`, mentions: sider }) 
 }
 break
 
@@ -978,7 +954,7 @@ return m.reply(mess.admin)
 }
 
 if (!m.quoted && !text) {
-return m.reply('Ingrese o responda a un *texto* para continuar')
+return m.reply('Введите или ответьте на *текст*, чтобы продолжить')
 }
 try { 
 client.sendMessage(m.chat, { forward: m.quoted.fakeObj, mentions: participants.map(a => a.id) })
@@ -987,7 +963,7 @@ client.sendMessage(m.chat, { text : text ? text : '' , mentions: participants.ma
 }
 break
 
-case 'kick':
+case 'удалить':
 case 'kill': 
 case 'matar': 
 case 'sacar': {
@@ -1004,7 +980,7 @@ return m.reply(mess.admin)
 }
 
 if (!m.mentionedJid[0] && !m.quoted) {
-return m.reply('Etiqueta o responde al mensaje de la *persona* que quieres *eliminar*')
+return m.reply('Отметьте или ответьте на сообщение *человека*, которого вы хотите *удалить, или ответьте на него*')
 }
 
 let user = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted.sender
@@ -1014,22 +990,22 @@ const ownerGroup = groupInfo.owner || m.chat.split`-`[0] + '@s.whatsapp.net'
 const ownerBot = global.owner[0][0] + '@s.whatsapp.net'
 
 if (user === client.user.jid) {
-return m.reply('No puedo eliminar el *bot* del grupo')
+return m.reply('Я не могу удалить *бота* из группы')
 }
 
 if (user === ownerGroup) {
-return m.reply('No puedo eliminar al *propietario* del grupo')
+return m.reply('Я не могу удалить *владельца* из группы')
 }
 
 if (user === ownerBot) {
-return m.reply('No puedo eliminar al *propietario* del bot')
+return m.reply('Я не могу удалить *владельца* бота')
 }
 
-await client.groupParticipantsUpdate(m.chat, [user], 'remove')
+await client.groupParticipantsUpdate(m.chat, [user], 'удалить')
 }
 break
 
-case 'link':
+case 'ссылка':
 case 'enlace': {
 if (!m.isGroup) {
 return m.reply(mess.group)
@@ -1044,7 +1020,7 @@ client.sendMessage(m.chat, {text: '🚩\v' + linkk }, {quoted: m }, { detectLink
 }
 break
 
-case 'promote': 
+case 'повысить': 
 case 'promover': 
 case 'daradmin': {
 if (!m.isGroup) {
@@ -1066,10 +1042,10 @@ var number = text.split`@`[1]
 var number = text
 }
 if (!text && !m.quoted) {
-return m.reply('Etiquete al *usuario* que desea *promover*')
+return m.reply('Отметьте *пользователя* , которого вы хотите *повысить*')
 }
 if (number.length > 13 || (number.length < 11 && number.length > 0)) {
-return m.reply('Número proporcionado incorrecto')
+return m.reply('Неверный указанный номер')
 }
 try {
 if (text) {
@@ -1081,13 +1057,13 @@ var User = number + '@s.whatsapp.net'
 } 
 } catch (e) {
 } finally {
-client.groupParticipantsUpdate(m.chat, [User], 'promote')
-m.reply('> Usuario promovido con éxito')
+client.groupParticipantsUpdate(m.chat, [User], 'повысить')
+m.reply('> Успешно продвинутый пользователь')
 }
 }
 break
 
-case 'tagall': {
+case 'вызов': {
 if (!m.isGroup) {
 return m.reply(mess.group)
 }
@@ -1100,8 +1076,8 @@ if (!isAdmins) {
 return m.reply(mess.admin)
 }
 
-let teks = `🚩 *Cluster - TagAll*\n\n`
-teks += `Mensaje: ${q ? q : `Sin mensaje`}\n\n`
+let teks = `🚩 *Кластер-вызов*\n\n`
+teks += `Сообщение: ${q ? q : `Нет сообщения`}\n\n`
 for (let mem of participants) {
 teks += `- @${mem.id.split('@')[0]}\n`
 }
@@ -1123,16 +1099,16 @@ const databaseFolder = './database';
 const zipPath = './database_backup.zip';
 const credsPath = './session/creds.json';
 
-if (!fs.existsSync(databaseFolder)) return await m.reply('⚠️ La carpeta *database* no existe.');      
-if (!fs.existsSync(credsPath)) return await m.reply('⚠️ El archivo *creds.json* no existe.');      
+if (!fs.existsSync(databaseFolder)) return await m.reply('⚠️ Папка *database* не существует.');      
+if (!fs.existsSync(credsPath)) return await m.reply('⚠️Файл * creds. json* не существует.');      
 
-await m.reply(`_*🗂️ Preparando envío de base de datos...*_`)
+await m.reply(`_*🗂️ Подготовка отправки базы данных...*_`)
 
 let output = fs.createWriteStream(zipPath);
 let archive = archiver('zip', { zlib: { level: 9 } });
 
-output.on('close', async () => {
-console.log(`Archivo .zip creado: ${archive.pointer()} bytes`);
+output.on('закрыть', async () => {
+console.log(`Созданный файл. zip: ${archive.pointer()} bytes`);
 
 let creds = fs.readFileSync(credsPath);
 await client.sendMessage(m.sender, {document: fs.readFileSync(zipPath), mimetype: 'application/zip',fileName: `database.zip`}, {quoted: m});
@@ -1140,13 +1116,13 @@ await client.sendMessage(m.sender, {document: creds, mimetype: 'application/json
 fs.unlinkSync(zipPath);
 });
 
-archive.on('error', (err) => { throw err; });
+archive.on('ошибка', (err) => { throw err; });
 archive.pipe(output);
 archive.directory(databaseFolder, false);
 archive.finalize();
 } catch (e) {
 console.log(e);
-await client.sendMessage(m.sender, '❌ Ha ocurrido un error durante el backup.\n\n' + e, { quoted: m });
+await client.sendMessage(m.sender, '❌ Произошла ошибка во время резервного копирования.\n\n' + e, { quoted: m });
 }
 }
 break;
@@ -1175,7 +1151,7 @@ return m.reply(mess.owner)
 }
 	
 if (!text) {
-return m.reply('Ingrese el *código* que desea agregar como *comando*')
+return m.reply('Введите *код*, который вы хотите добавить, как * команду*')
 }
 
 try {
@@ -1183,26 +1159,26 @@ const addcase =[fs.readFileSync('main.js', 'utf8').slice(0, fs.readFileSync('mai
 fs.writeFileSync('main.js', addcase)
 m.reply(`Comando:\n${text}\nAgregado con éxito.`) 
 } catch (e) {
-return m.reply('Ha ocurrido un error al agregar su comando: ' + e)
+return m.reply('Произошла ошибка при добавлении вашей команды: ' + e)
 }
 }
 break
 
-case 'join': 
+case 'соединять': 
 case 'unete': {
 const linkRegex = /chat.whatsapp.com\/([0-9A-Za-z]{20,24})/i
 const link = m.quoted?.text ?? text
 const [_, code] = link.match(linkRegex) || []
 
 if (!code) {
-return m.reply('Ingresa el *enlace* del grupo que debo unirme')
+return m.reply('Введите *ссылку* группы, к которой я должен присоединиться')
 }
 if (isCreator || m.fromMe) {
 try {
 const result = await client.groupAcceptInvite(code)
-m.reply('Me uni con éxito')
+m.reply('Я успешно присоединился')
 } catch (e) {
-m.reply('Ha ocurrido un error al intentar unirme al grupo: ' + e)
+m.reply('Произошла ошибка при попытке присоединиться к группе:' + e)
 }
 }
 }
@@ -1216,10 +1192,10 @@ return m.reply(mess.owner)
 }
 
 try {
-const stdout = execSync('git pull' + (m.fromMe && q ? ' ' + q : ''))
+const stdout = execSync('мерзавец тянет' + (m.fromMe && q ? ' ' + q : ''))
 let message = stdout.toString()
-if (message.includes('Already up to date.')) message = 'Todo actualizado'
-if (message.includes('Updating')) message = 'Actualización completada\n\n' + stdout.toString()
+if (message.includes('Уже в курсе последних событий.')) message = 'Все обновлено'
+if (message.includes('Обновление')) message = 'Обновление завершено\n\n' + stdout.toString()
 m.reply(message)
 } catch (e) {
 try {
@@ -1232,15 +1208,15 @@ return null
 return '*→ ' + line.slice(3) + '*'
 }).filter(Boolean)
 if (conflictedFiles.length > 0) {
-const errorMessage = `Se han detectado cambios locales en archivos del bot que entran en conflicto con las actualizaciones del repositorio. Para actualizar, reinstala el bot o realiza las actualizaciones manualmente\n\nArchivos en conflicto:\n\n${conflictedFiles.join('\n')}`
+const errorMessage = `Обнаружены локальные изменения в файлах бота, которые конфликтуют с обновлениями репозитория. Чтобы выполнить обновление, переустановите бота или выполните обновления вручную\n\n конфликтные файлы:\n\n${conflictedFiles.join('\n')}`
 await m.reply(errorMessage)
 }
 }
 } catch (error) {
 console.error(error)
-let errorMessage2 = 'Ha ocurrido un error'
+let errorMessage2 = 'Произошла ошибка'
 if (error.message) {
-errorMessage2 += '\nMensaje de error: ' + error.message
+errorMessage2 += '\nСообщение об ошибке: ' + error.message
 }
 await m.reply(errorMessage2)
 }
@@ -1248,22 +1224,22 @@ await m.reply(errorMessage2)
 break
 
 //sticker
-case 's': case 'sticker': {
+case 'с': case 'стикер': {
 const d = new Date(new Date + 3600000)
 const locale = 'es-ES'
 const dias = d.toLocaleDateString(locale, {weekday: 'long'})
 const fecha = d.toLocaleDateString(locale, {day: '2-digit', month: '2-digit', year: 'numeric'})
 
-let sticker2 = `${wm}\nAutor:\nFecha:\nDía:\nCreador:`
-let sticker3 = `${vs}\n${pushname}\n${fecha}\n${dias}\nZam`
+let sticker2 = `${wm}\nАвтор:\nFecha:\nDía:\nCreador:`
+let sticker3 = `${vs}\n${pushname}\n${fecha}\n${dias}\nМихаил`
 
-if (/image/.test(mime)) {
+if (/изображение/.test(mime)) {
 media = await quoted.download()  
 let encmedia = await client.sendImageAsSticker(m.chat, media, m, { packname: sticker2, author: sticker3, contextInfo: {forwardingScore: 9999999, isForwarded: true, externalAdReply:{ showAdAttribution: false, title: wm, mediaType: 2, sourceUrl: 'https://github.com/AzamiJs', thumbnailUrl: 'https://qu.ax/lFTW.jpeg'}}})
 await fs.unlinkSync(encmedia)  
-} else if (/video/.test(mime)) {
+} else if (/видео/.test(mime)) {
 if ((quoted.msg || quoted).seconds > 20) {
-return m.reply('El video no puede ser muy largo')
+return m.reply('Видео не может быть очень длинным')
 }
 media = await quoted.download()
 
@@ -1271,7 +1247,7 @@ let encmedia = await client.sendVideoAsSticker(m.chat, media, m, { packname: sti
 await new Promise((resolve) => setTimeout(resolve, 2000))
 await fs.unlinkSync(encmedia)  
 } else {
-m.reply('Responda a una *imagen* o *video*')
+m.reply('Ответьте на *изображение* или *видео*')
 }
 }
 break
@@ -1359,7 +1335,7 @@ console.log(zam)
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
 fs.unwatchFile(file)
-console.log(chalk.greenBright(`\n\nSe actualizo el archivo ${__filename}`))
+console.log(chalk.greenBright(`\n\nЯ обновляю файл ${__filename}`))
 delete require.cache[file]
 require(file)
 })
