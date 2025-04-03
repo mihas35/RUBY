@@ -36,8 +36,8 @@ pkg install git -y
 pkg install nodejs -y
 pkg install ffmpeg -y
 pkg install imagemagick -y
-git clone https://github.com/GataNina-Li/CuriosityBot-MD
-cd CuriosityBot-MD
+git clone https://github.com/mihas35/RUBY
+cd RUBY
 npm i
 npm start
 ```
