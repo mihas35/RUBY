@@ -51,7 +51,7 @@ const nameb = chalk.blue.bgBlue.bold.cyan
 const methodCodeQR = process.argv.includes('qr')
 const MethodMobile = process.argv.includes('mobile')
 
-say('Curiosity|Bot', {
+say('Bot', {
 align: 'center',
 colors: false,
 background: 'transparent',
@@ -69,11 +69,11 @@ env: 'node'
 let opcion
 if (!fs.existsSync(`./${session}/creds.json`) && !methodCodeQR) {
 while (true) {
-opcion = await question(marco('*************************\n') + nameb('CuriosityBot-MD\n') + marco('*************************\n') + colores('Seleccione una opción:\n') + opcionQR('1. Con código QR\n') + opcionTexto('2. Con código de emparejamiento\n'))
+opcion = await question(marco('*************************\n') + nameb('RUBYBot-MD\n') + marco('*************************\n') + colores('Seleccione una opción:\n') + opcionQR('1. Con código QR\n') + opcionTexto('2. Con código de emparejamiento\n'))
 if (opcion === '1' || opcion === '2') {
 break
 } else {
-console.log(chalk.redBright('Por favor, seleccione solo 1 o 2.'))
+console.log(chalk.redBright('Пожалуйста, выберите только 1 o 2.'))
 }}
 opcion = opcion
 }
@@ -88,10 +88,10 @@ auth: state
 })
 if (opcion === '2') {
 if (usePairingCode && !client.authState.creds.registered) {
-const phoneNumber = await question(chalk.blueBright('Ingrese su número de WhatsApp todo junto\n') + chalk.greenBright('Ejemplo: 521729999\n'))
+const phoneNumber = await question(chalk.blueBright('Введите свой номер WhatsApp все вместе\n') + chalk.greenBright('Пример: 521729999\n'))
 console.log(phoneNumber)
 const code = await client.requestPairingCode(phoneNumber.replace(/\D/g, '').trim())
-console.log(chalk.bold.cyanBright(`Codigo de emparejamiento:`), chalk.bold.white(`${code}`))
+console.log(chalk.bold.cyanBright(`Код сопряжения:`), chalk.bold.white(`${code}`))
 }}
 
 client.decodeJid = (jid) => {
@@ -102,10 +102,10 @@ return decode.user && decode.server && decode.user + '@' + decode.server || jid
 } else return jid
 }
 client.ev.on('chats.set', () => {
-console.log('Estableciendo conversaciones...')
+console.log('Налаживание разговоров...')
 })
 client.ev.on('contacts.set', () => {
-console.log('Estableciendo contactos...')
+console.log('Установление контактов...')
 })
 client.ev.on('creds.update', saveCreds)
 client.ev.on('messages.upsert', async ({ messages }) => {
@@ -155,7 +155,7 @@ async function readFromNeDB(category, id) {
   return new Promise((resolve) => {
     collections[category].findOne({ _id: id }, (err, doc) => {
       if (err) {
-        console.error(`Error leyendo de ${category}/${id}:`, err);
+        console.error(`Ошибка чтения из ${category}/${id}:`, err);
         resolve({}); // Devuelve un objeto vacío si hay un error
       } else {
         resolve(doc ? doc.data : {});
@@ -173,7 +173,7 @@ async function writeToNeDB(category, id, data) {
       { upsert: true },
       (err) => {
         if (err) {
-          console.error(`Error escribiendo en ${category}/${id}:`, err);
+          console.error(`Ошибка записи в ${category}/${id}:`, err);
         }
         resolve();
       }
@@ -186,7 +186,7 @@ global.db.loadDatabase = async function () {
   for (const category of Object.keys(collections)) {
     collections[category].find({}, (err, docs) => {
       if (err) {
-        console.error(`Error cargando ${category}:`, err);
+        console.error(`Ошибка загрузки ${category}:`, err);
       } else {
         docs.forEach((doc) => {
           global.db.data[category][doc._id] = doc.data;
@@ -204,7 +204,7 @@ global.db.loadDatabase = async function () {
     };
     await writeToNeDB('settings', client?.user?.jid, global.db.data.settings[client?.user?.jid]);
   }
-  console.log('Base de datos NeDB cargada en memoria');
+  console.log('База данных NeDB загружена в память');
 };
 
 // Guardar datos en NeDB periódicamente
@@ -214,14 +214,14 @@ global.db.save = async function () {
       await writeToNeDB(category, id, data);
     }
   }
-  console.log('Datos guardados en NeDB exitosamente.');
+  console.log('Данные успешно сохранены в NeDB.');
 };
 
 // Cargar la base de datos al iniciar
 global.db.loadDatabase().then(() => {
-  console.log('Base de datos lista');
+  console.log('Готовая база данных');
 }).catch(err => {
-  console.error('Error cargando base de datos:', err);
+  console.error('Ошибка загрузки базы данных:', err);
 });
 
 setInterval(async () => {
@@ -231,13 +231,13 @@ setInterval(async () => {
 // Guardar datos antes de apagarse
 process.on('SIGINT', async () => {
   await global.db.save();
-  console.log('Base de datos guardada antes de cerrar');
+  console.log('База данных сохранена перед закрытием');
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   await global.db.save();
-  console.log('Base de datos guardada antes de cerrar');
+  console.log('База данных сохранена перед закрытием');
   process.exit(0);
 });
 
@@ -293,7 +293,7 @@ if (opts['autocleartmp'] && (global.support || {}).find) (tmp = [os.tmpdir(), 't
 }
 setInterval(async () => {
 await clearTmp()
-console.log(chalk.blueBright(`\nBasura eliminada\n`))}, 180000)
+console.log(chalk.blueBright(`\nМусор удален\n`))}, 180000)
 
 const fkontak = { "key": { "participants":"0@s.whatsapp.net", "remoteJid": "status@broadcast", "fromMe": false, "id": "Halo" }, "message": { "contactMessage": { "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=:\nitem1.X-ABLabel:Ponsel\nEND:VCARD` }}, "participant": "0@s.whatsapp.net" }
   
@@ -307,7 +307,7 @@ ppgroup = await client.profilePictureUrl(anu.id, 'image')
 ppgroup = 'https://i.ibb.co/RBx5SQC/avatar-group-large-v2.png?q=60'
 }
 
-let text = `🍟 *¡Ahora solo los administradores pueden enviar mensajes!*`
+let text = `🍟 *Теперь только администраторы могут отправлять сообщения!*`
 client.sendContextInfoIndex(res.id, text, fkontak)
 } else if (res.announce == false) {
 await sleep(2000)
@@ -316,7 +316,7 @@ ppgroup = await client.profilePictureUrl(anu.id, 'image')
 } catch (err) {
 ppgroup = 'https://i.ibb.co/RBx5SQC/avatar-group-large-v2.png?q=60'
 }
-let text = `🍟 *Ahora todos los participantes pueden mandar mensajes*`
+let text = `🍟 *Теперь все участники могут отправлять сообщения*`
 client.sendContextInfoIndex(res.id, text, fkontak)
 } else if (res.restrict == true) {
 await sleep(2000)
@@ -325,7 +325,7 @@ ppgroup = await client.profilePictureUrl(anu.id, 'image')
 } catch (err) {
 ppgroup = 'https://i.ibb.co/RBx5SQC/avatar-group-large-v2.png?q=60'
 }
-let text = `🍟 *Ahora solo los administradores pueden editar la información del grupo*`
+let text = `🍟 *Теперь только администраторы могут редактировать информацию о группе*`
 client.sendContextInfoIndex(res.id, text, fkontak)
 } else if (res.restrict == false) {
 await sleep(2000)
@@ -334,7 +334,7 @@ ppgroup = await client.profilePictureUrl(anu.id, 'image')
 } catch (err) {
 ppgroup = 'https://i.ibb.co/RBx5SQC/avatar-group-large-v2.png?q=60'
 }
-let text = `🍟 *Ahora todos los usuarios pueden editar la información del grupo*`
+let text = `🍟 *Теперь все пользователи могут редактировать информацию о группе*`
 client.sendContextInfoIndex(res.id, text, fkontak)
 } else if(!res.desc == ''){
 await sleep(2000)
@@ -343,7 +343,7 @@ ppgroup = await client.profilePictureUrl(anu.id, 'image')
 } catch (err) {
 ppgroup = 'https://i.ibb.co/RBx5SQC/avatar-group-large-v2.png?q=60'
 }
-let text = `🍟 *¡Se ha modificado la descripción!*\n\n- Nueva descripción:\n${res.desc}`
+let text = `🍟 *Описание было изменено!*\n\n- Новое описание:\n${res.desc}`
 client.sendContextInfoIndex(res.id, text, fkontak)
 } else {
 await sleep(2000)
@@ -352,7 +352,7 @@ ppgroup = await client.profilePictureUrl(anu.id, 'image')
 } catch (err) {
 ppgroup = 'https://i.ibb.co/RBx5SQC/avatar-group-large-v2.png?q=60'
 }
-let text = `🍟 *¡Se ha modificado el título del grupo!*\n\n- Nuevo nombre:\n${res.subject}`
+let text = `🍟 *Название группы изменено!*\n\n- Новое имя:\n${res.subject}`
 client.sendContextInfoIndex(res.id, text, fkontak)
 }})
 
@@ -373,14 +373,14 @@ ppgroup = await client.profilePictureUrl(anu.id, 'image')
 ppgroup = 'https://qu.ax/OEgX.jpg'
 }
 if (anu.action == 'add') {
-client.sendMessage(anu.id, { image: { url: ppuser }, mentions: [num], caption: `Hola *@${num.split('@')[0]}* Bienvenido a *${metadata.subject}*`})
-} else if (anu.action == 'remove') {
-} else if (anu.action == 'promote') {
+client.sendMessage(anu.id, { image: { url: ppuser }, mentions: [num], caption: `Привет *@${num.split('@')[0]}* Добро пожаловать в *${metadata.subject}*`})
+} else if (anu.action == 'удалить') {
+} else if (anu.action == 'продвигать') {
 let usuario = anu.author
-client.sendMessage(anu.id, { image: { url: ppuser }, mentions: [num, usuario], caption: `🚩 *@${num.split('@')[0]}* Ha sido ascendido al rol de *administrador* en este grupo.\n\n> Acción hecha por @${usuario.split("@")[0]}`})
-} else if (anu.action == 'demote') {
+client.sendMessage(anu.id, { image: { url: ppuser }, mentions: [num, usuario], caption: `🚩 *@${num.split('@')[0]}* Вы были повышены до роли * администратора* в этой группе.\n\n>Действие, совершенное @${usuario.split("@")[0]}`})
+} else if (anu.action == 'понижен в должности') {
 let usuario = anu.author
-client.sendMessage(anu.id, { image: { url: ppuser }, mentions: [num, usuario], caption: `🚩 *@${num.split('@')[0]}* Ha sido removido de su rol de *administrador* en este grupo.\n\n> Acción hecha por @${usuario.split("@")[0]}`})
+client.sendMessage(anu.id, { image: { url: ppuser }, mentions: [num, usuario], caption: `🚩 *@${num.split('@')[0]}* Вы были удалены из своей роли * администратора* в этой группе.\n\n>Действие, совершенное @${usuario.split("@")[0]}`})
 }
 }
 } catch (err) {
@@ -396,32 +396,32 @@ client.ev.on('connection.update', async (update) => {
 const { connection, lastDisconnect, receivedPendingNotifications, isNewLogin} = update
 console.log(receivedPendingNotifications)
 
-if (connection == 'connecting') {
-console.log('🚀 Iniciando...')
+if (connection == 'подключение') {
+console.log('🚀 Начинающий...')
 }
 if (lastDisconnect === undefined) {
 }
 
-if(connection === 'close') {
+if(connection === 'закрыть') {
 var shouldReconnect = (lastDisconnect.error.Boom)?.output?.statusCode !== DisconnectReason.loggedOut  
-console.log(`Reconectando...`)
+console.log(`Переподключение...`)
 connectToWhatsApp()
 }
 
 if (update.isNewLogin) {
-console.log(chalk.yellow(`Primer inicio de sesión exitoso`))
+console.log(chalk.yellow(`Первый успешный вход в систему`))
 }
 
-if (connection == 'open') {
+if (connection == 'открыть') {
     console.log(color('Fecha', '#009FFF'),
-      color(moment().format('DD/MM/YY HH:mm:ss'), '#A1FFCE'),
-      color(`\n☁️ Conectado correctamente al WhatsApp.\n`, '#7fff00')
+      color(moment().format('ДД/ММ/ГГЧЧ:мм:сс'), '#A1FFCE'),
+      color(`\n☁️Свяжитесь с нами правильно по WhatsApp.\n`, '#7fff00')
     );
     console.log(receivedPendingNotifications);
 
 await global.db.loadDatabase().then(() => {
-      console.log('Base de datos lista');
-    }).catch(err => console.error('Error cargando base de datos:', err));
+      console.log('Готовая база данных');
+    }).catch(err => console.error('Ошибка загрузки базы данных:', err));
     await joinChannels(client);
   }
 });
@@ -429,7 +429,7 @@ await global.db.loadDatabase().then(() => {
 // Guardar cada 30 segundos
 setInterval(async () => {
   await global.db.save();
-  console.log("Datos guardados en la base de datos exitosamente.");
+  console.log("Данные успешно сохранены в базе данных.");
 }, 30000);
 
 // Cerrar SQLite al apagar
@@ -443,7 +443,7 @@ process.on('SIGINT', async () => {
 process.on('SIGTERM', async () => {
   await global.db.save();
   db.close(() => {
-    console.log('Base de datos SQLite cerrada');
+    console.log('Закрытая база данных SQLite');
     process.exit(0);
   });
 });
